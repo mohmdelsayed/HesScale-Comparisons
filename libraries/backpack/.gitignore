@@ -1,8 +1,0 @@
-__pycache__/
-*.egg-info/
-**/*.pyc
-.cache
-docs/
-examples/data
-.idea
- 
