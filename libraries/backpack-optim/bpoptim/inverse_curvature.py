@@ -5,9 +5,7 @@ General class to hold the inverse of an approximation of the curvature.
 Only provides one method, the multiplication with a vector.
 """
 
-from backpack.extensions.secondorder.utils import multiply_vec_with_kron_facs
-from backpack.utils.utils import einsum
-
+from bpoptim.utils import multiply_vec_with_kron_facs
 
 class InverseCurvature:
     def __init__(self, inv_curv):

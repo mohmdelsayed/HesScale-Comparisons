@@ -3,192 +3,57 @@ Pytorch optimizers based on BackPACK.
 """
 
 from .constant_damping import ConstantDampingOptimizer
-from .curvature import (DiagGGNExactCurvature, DiagGGNMCCurvature,
-                        KFACCurvature, KFLRCurvature, KFRACurvature,
-                        ZeroCurvature)
-from .fancy_damping import FancyDampingOptimizer
-from .lm_damping import LMOptimizer
+from .curvature import (
+    DiagGGNExactCurvature,
+    DiagGGNMCCurvature,
+    ZeroCurvature,
+    HesScaleCurvature,
+    KFACCurvature,
+    KFLRCurvature,
+    KFRACurvature,
+)
 
-##############################################################################
-# Exact DiagGGN optimizers                                                   #
-##############################################################################
+
+def HesScaleConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return ConstantDampingOptimizer(
+        params, HesScaleCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def DiagGGNConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    DiagGGNExactCurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def DiagGGNLMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       DiagGGNExactCurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def DiagGGNFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 DiagGGNExactCurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
-
-
-##############################################################################
-# MC-sampled DiagGGN optimizers                                              #
-##############################################################################
+    return ConstantDampingOptimizer(
+        params, DiagGGNExactCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def DiagGGNMCConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    DiagGGNMCCurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def DiagGGNMCLMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       DiagGGNMCCurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def DiagGGNMCFancyDampingOptimizer(params,
-                                   initial_trust_damping=150.,
-                                   **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 DiagGGNMCCurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
-
-
-##############################################################################
-# Zero curvature optimizers                                                  #
-##############################################################################
+    return ConstantDampingOptimizer(
+        params, DiagGGNMCCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def ZeroConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    ZeroCurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def ZeroLMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       ZeroCurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def ZeroFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 ZeroCurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
-
-
-##############################################################################
-# KFAC curvature optimizers                                                  #
-##############################################################################
+    return ConstantDampingOptimizer(
+        params, ZeroCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def KFACConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    KFACCurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def KFACLMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       KFACCurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def KFACFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 KFACCurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
-
-
-##############################################################################
-# KFLR curvature optimizers                                                  #
-##############################################################################
+    return ConstantDampingOptimizer(
+        params, KFACCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def KFLRConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    KFLRCurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def KFLRLMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       KFLRCurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def KFLRFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 KFLRCurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
-
-
-##############################################################################
-# KFRA curvature optimizers                                                  #
-##############################################################################
+    return ConstantDampingOptimizer(
+        params, KFLRCurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 def KFRAConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(params,
-                                    KFRACurvature,
-                                    lr=lr,
-                                    damping=damping,
-                                    **kwargs)
-
-
-def KFRALMOptimizer(params, lr=1, initial_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return LMOptimizer(params,
-                       KFRACurvature,
-                       lr=lr,
-                       initial_damping=initial_damping,
-                       **kwargs)
-
-
-def KFRAFancyDampingOptimizer(params, initial_trust_damping=150., **kwargs):
-    raise NotImplementedError("Not yet supported")
-    return FancyDampingOptimizer(params,
-                                 KFRACurvature,
-                                 initial_trust_damping=initial_trust_damping,
-                                 **kwargs)
+    return ConstantDampingOptimizer(
+        params, KFRACurvature, lr=lr, damping=damping, **kwargs
+    )
 
 
 """

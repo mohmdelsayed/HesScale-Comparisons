@@ -9,16 +9,19 @@ The role of those classes is to
 """
 
 import math
-
+from torch import einsum, symeig
 from backpack import backpack
-from backpack.extensions import KFAC, KFLR, KFRA, DiagGGNExact, DiagGGNMC
-from backpack.extensions.secondorder.utils import multiply_vec_with_kron_facs
-from backpack.utils.utils import einsum
+from backpack.extensions import DiagGGNExact, DiagGGNMC, KFAC, KFLR, KFRA
+
+from bpoptim.utils import multiply_vec_with_kron_facs
+from hesscale import HesScale
 
 from .utils import NUMERICAL_STABILITY_CONSTANT
-from .inverse_curvature import (DiagonalInverseCurvature,
-                                KroneckerInverseCurvature,
-                                ScalarInverseCurvature)
+from .inverse_curvature import (
+    DiagonalInverseCurvature,
+    ScalarInverseCurvature,
+    KroneckerInverseCurvature,
+)
 from .moving_average import MovingAverage
 
 
@@ -69,11 +72,10 @@ class ZeroCurvature(CurvatureEstimator):
         self.curv = self._get_curv()
 
     def _get_curv(self):
-        ZERO = 0.
-        curv = list([
-            list([ZERO for p in group['params']])
-            for group in self.param_groups
-        ])
+        ZERO = 0.0
+        curv = list(
+            [list([ZERO for p in group["params"]]) for group in self.param_groups]
+        )
         return curv
 
     def compute_curvature(self, closure, retain_graph=False):
@@ -92,8 +94,7 @@ class ZeroCurvature(CurvatureEstimator):
 
     def multiply(self, damping, grad):
         result = []
-        for curv_group, damping_group, grad_group in zip(
-                self.curv, damping, grad):
+        for curv_group, damping_group, grad_group in zip(self.curv, damping, grad):
             result.append([])
             for curv_p, grad_p in zip(curv_group, grad_group):
                 result[-1].append((curv_p + damping_group) * grad_p)
@@ -115,10 +116,12 @@ class BackpackCurvatureEstimator(CurvatureEstimator):
             loss, output = closure()
             loss.backward(retain_graph=retain_graph)
 
-            input_to_moving_average = list([
-                list([getattr(p, bp_savefield) for p in group['params']])
-                for group in self.param_groups
-            ])
+            input_to_moving_average = list(
+                [
+                    list([getattr(p, bp_savefield) for p in group["params"]])
+                    for group in self.param_groups
+                ]
+            )
 
             self.moving_average.step(input_to_moving_average)
 
@@ -159,6 +162,9 @@ class DiagGGNMCCurvature(DiagCurvatureBase):
     def __init__(self, param_groups):
         super().__init__(param_groups, DiagGGNMC)
 
+class HesScaleCurvature(DiagCurvatureBase):
+    def __init__(self, param_groups):
+        super().__init__(param_groups, HesScale)
 
 class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls):
@@ -242,7 +248,7 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
 
     def __eigen(self, sym_mat):
         """Return eigenvalues and eigenvectors from eigendecomposition."""
-        eigvals, eigvecs = sym_mat.symeig(eigenvectors=True)
+        eigvals, eigvecs = symeig(sym_mat, eigenvectors=True)
         return eigvals, eigvecs
 
     def __inv_from_eigen(self, eigvals, eigvecs, truncate=NUMERICAL_STABILITY_CONSTANT):
