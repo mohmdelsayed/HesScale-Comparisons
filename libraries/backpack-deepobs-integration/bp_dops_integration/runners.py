@@ -335,7 +335,7 @@ class BPOptimRunner(NoBackwardOnRegularizationRunner):
                 raise BatchLossIsNanOrTooLargeException(batch_loss)
 
             # model output with BackPACK
-            model_output = tproblem.net.output
+            model_output = {}
 
             return batch_loss, model_output
 
