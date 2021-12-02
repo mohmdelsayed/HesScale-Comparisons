@@ -1,6 +1,6 @@
--e git+https://github.com/toiaydcdyywlhzvlob/backpack.git@9cc53999ebff17ea53e4d46681cb6d4917159a14#egg=BackPACK_DeepOBS_Integration&subdirectory=libraries/backpack-deepobs-integration
+-e git+ssh://git@github.com/mohmdelsayed/HesScale-Comparisons.git@3fc703e0c733cd1007a10c2298c973e29730d47c#egg=BackPACK_DeepOBS_Integration&subdirectory=libraries/backpack-deepobs-integration
 backpack-for-pytorch==1.3.0
--e git+https://github.com/toiaydcdyywlhzvlob/backpack.git@9cc53999ebff17ea53e4d46681cb6d4917159a14#egg=BackPACK_Optim&subdirectory=libraries/backpack-optim
+-e git+ssh://git@github.com/mohmdelsayed/HesScale-Comparisons.git@3fc703e0c733cd1007a10c2298c973e29730d47c#egg=BackPACK_Optim&subdirectory=libraries/backpack-optim
 bayesian-optimization==1.2.0
 black==21.11b1
 click==8.0.3
@@ -8,7 +8,7 @@ cycler==0.11.0
 -e git+https://github.com/fsschneider/DeepOBS.git@0be822c3f88f0cf499d019b13ce9e27227fdd8b9#egg=deepobs
 einops==0.3.2
 fonttools==4.28.1
--e git+https://github.com/toiaydcdyywlhzvlob/backpack.git@9cc53999ebff17ea53e4d46681cb6d4917159a14#egg=HesScale&subdirectory=hesscale
+-e git+ssh://git@github.com/mohmdelsayed/HesScale-Comparisons.git@3fc703e0c733cd1007a10c2298c973e29730d47c#egg=HesScale&subdirectory=hesscale
 importlib-metadata==4.8.2
 joblib==1.1.0
 kiwisolver==1.3.2
