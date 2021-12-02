@@ -5,82 +5,72 @@ import bpoptim
 from .grid_search import BPGridSearch
 from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
                      TuningDiagGGNExact, TuningDiagGGNMC, TuningFancyDamping,
-                     TuningKFAC, TuningKFLR, TuningKFRA, TuningLMDamping,
+                     TuningKFAC, TuningKFLR, TuningKFRA, TuningLMDamping, 
                      TuningZero)
 
 PROBLEMS = [
-    'mnist_logreg',
-    'fmnist_2c2d',
-    'cifar10_3c3d',
-    'cifar100_allcnnc',
+    'localtestproblem',
+    # 'mnist_logreg',
+    # 'fmnist_2c2d',
+    # 'cifar10_3c3d',
+    # 'cifar100_allcnnc',
 ]
 
 BATCH_SIZES = [
-    None,
+    # None,
     # 64,
-    # 128,
+    128,
     # 256,
     # 512,
 ]
 
-
+NUM_EPOCHS = [
+    # None,
+    10,
+    # 128,
+    # 256,
+    # 512,
+]
 class GridSearchFactory():
     Zero = "Zero"
     DiagGGNExact = "DiagGGN"
     DiagGGNMC = "DiagGGN_MC"
+    HesScale = "HesScale"
     KFAC = "KFAC"
     KFLR = "KFLR"
-    KFRA = "KFRA"
-
     CURVATURES = [
-        Zero,
-        DiagGGNExact,
+        # Zero,
         DiagGGNMC,
+        DiagGGNExact,
+        HesScale,
         KFAC,
         KFLR,
-        KFRA,
     ]
 
     CURVATURES_TUNING = {
         Zero: TuningZero,
         DiagGGNExact: TuningDiagGGNExact,
         DiagGGNMC: TuningDiagGGNMC,
+        HesScale: TuningDiagGGNMC,
         KFAC: TuningKFAC,
         KFLR: TuningKFLR,
-        KFRA: TuningKFRA
     }
 
     CONSTANT = "const"
-    LM = "LM"
-    FANCY = "fancy"
 
-    DAMPINGS = [CONSTANT, LM, FANCY]
+    DAMPINGS = [CONSTANT]
 
     DAMPINGS_TUNING = {
         CONSTANT: TuningConstantDamping,
-        LM: TuningLMDamping,
-        FANCY: TuningFancyDamping
     }
 
     DAMPED_OPTIMS = {
         (Zero, CONSTANT): bpoptim.ZeroConstantDampingOptimizer,
-        (Zero, LM): bpoptim.ZeroLMOptimizer,
-        (Zero, FANCY): bpoptim.ZeroFancyDampingOptimizer,
         (DiagGGNExact, CONSTANT): bpoptim.DiagGGNConstantDampingOptimizer,
-        (DiagGGNExact, LM): bpoptim.DiagGGNLMOptimizer,
-        (DiagGGNExact, FANCY): bpoptim.DiagGGNFancyDampingOptimizer,
         (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCConstantDampingOptimizer,
-        (DiagGGNMC, LM): bpoptim.DiagGGNMCLMOptimizer,
-        (DiagGGNMC, FANCY): bpoptim.DiagGGNMCFancyDampingOptimizer,
+        (HesScale, CONSTANT): bpoptim.HesScaleConstantDampingOptimizer,
         (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,
-        (KFAC, LM): bpoptim.KFACLMOptimizer,
-        (KFAC, FANCY): bpoptim.KFACFancyDampingOptimizer,
         (KFLR, CONSTANT): bpoptim.KFLRConstantDampingOptimizer,
-        (KFLR, LM): bpoptim.KFLRLMOptimizer,
-        (KFLR, FANCY): bpoptim.KFLRFancyDampingOptimizer,
-        (KFRA, CONSTANT): bpoptim.KFRAConstantDampingOptimizer,
-        (KFRA, LM): bpoptim.KFRALMOptimizer,
-        (KFRA, FANCY): bpoptim.KFRAFancyDampingOptimizer,
     }
 
     def make_grid_search(self,

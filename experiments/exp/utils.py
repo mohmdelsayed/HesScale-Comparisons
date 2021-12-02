@@ -7,7 +7,7 @@ import os
 ##############################################################################
 # grid search
 from bp_dops_integration.experiments import (BATCH_SIZES, PROBLEMS,
-                                             GridSearchFactory)
+                                             GridSearchFactory, NUM_EPOCHS)
 
 DAMPINGS = GridSearchFactory.DAMPINGS
 CURVATURES = GridSearchFactory.CURVATURES
@@ -183,10 +183,10 @@ def _exclude(damping, problem, curvature):
     # add more criteria to exclude runs
     criteria = [
         exclude_zero,
-        exclude_lm_and_fancy,
-        exclude_KFRA_for_fmnist_cifar10_cifar100,
+        # exclude_lm_and_fancy,
+        # exclude_KFRA_for_fmnist_cifar10_cifar100,
         exclude_DiagGGNExact_for_cifar100,
-        exclude_KFLR_for_cifar100,
+        # exclude_KFLR_for_cifar100,
     ]
 
     for criterion in criteria:

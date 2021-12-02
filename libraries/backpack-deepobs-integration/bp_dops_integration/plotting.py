@@ -291,6 +291,7 @@ class BPPlotBase():
                     ax=ax,
                     mode=mode,
                     metric=metric,
+                    show=False,
                     reference_path=reference_path,
                     which=which)
         return fig, ax
@@ -346,24 +347,18 @@ class BPCustomLinestyles():
     BASELINE_DASHES = ["-", "-"]
 
     DASHES = {
-        GridSearchFactory.CONSTANT: "--",
-        GridSearchFactory.LM: "-",
-        GridSearchFactory.FANCY: "-.",
+        GridSearchFactory.CONSTANT: "-",
     }
 
     COLOR_LIST_IDX = {
         GridSearchFactory.CONSTANT: 3,
-        GridSearchFactory.LM: 3,
-        GridSearchFactory.FANCY: 3,
     }
 
     COLOR_LISTS = {
         GridSearchFactory.Zero: Greys_5.mpl_colors,
         GridSearchFactory.DiagGGNExact: Reds_5.mpl_colors,
         GridSearchFactory.DiagGGNMC: Oranges_6.mpl_colors,
-        GridSearchFactory.KFAC: Blues_5.mpl_colors,
-        GridSearchFactory.KFLR: Greens_5.mpl_colors,
-        GridSearchFactory.KFRA: Purples_4.mpl_colors,
+        GridSearchFactory.HesScale: Blues_5.mpl_colors,
     }
 
     def __init__(self, curv_damp_list, num_baselines=2):
