@@ -10,7 +10,7 @@ from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
 
 PROBLEMS = [
     'localtestproblem',
-    # 'mnist_logreg',
+    'mnist_logreg',
     # 'fmnist_2c2d',
     # 'cifar10_3c3d',
     # 'cifar100_allcnnc',
@@ -26,7 +26,7 @@ BATCH_SIZES = [
 
 NUM_EPOCHS = [
     # None,
-    10,
+    50,
     # 128,
     # 256,
     # 512,
@@ -43,8 +43,8 @@ class GridSearchFactory():
         DiagGGNMC,
         DiagGGNExact,
         HesScale,
-        KFAC,
-        KFLR,
+        # KFAC,
+        # KFLR,
     ]
 
     CURVATURES_TUNING = {
