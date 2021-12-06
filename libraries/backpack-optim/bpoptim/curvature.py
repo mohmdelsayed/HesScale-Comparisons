@@ -9,7 +9,8 @@ The role of those classes is to
 """
 
 import math
-from torch import einsum, symeig
+from torch import einsum, symeig, tensor
+from torch import max as torch_max
 from backpack import backpack
 from backpack.extensions import DiagGGNExact, DiagGGNMC, KFAC, KFLR, KFRA
 
@@ -162,9 +163,40 @@ class DiagGGNMCCurvature(DiagCurvatureBase):
     def __init__(self, param_groups):
         super().__init__(param_groups, DiagGGNMC)
 
-class HesScaleCurvature(DiagCurvatureBase):
+class HesScaleCurvatureBase(BackpackCurvatureEstimator):
+    def __init__(self, param_groups, bp_extension_cls, max_or_abs='abs'):
+        use_factors = False
+        self.max_or_abs = max_or_abs
+        super().__init__(param_groups, bp_extension_cls, use_factors)
+
+    def compute_inverse(self, damping):
+        curv = self.moving_average.get()
+
+        inv_curv = []
+        for curv_group, damping_group in zip(curv, damping):
+            inv_curv.append([])
+            for curv_p in curv_group:
+                if self.max_or_abs == 'abs':
+                    curv_p.abs_()
+                elif self.max_or_abs == 'max':
+                    torch_max(curv_p, tensor([0.0]), out=curv_p)
+                else:
+                    raise "No valid HesScale Operation!"
+                inv_curv[-1].append(1 / (curv_p + damping_group))
+        return DiagonalInverseCurvature(inv_curv)
+
+    def multiply(self, damping, grad):
+        curv = self.moving_average.get()
+        result = []
+        for curv_group, damping_group, grad_group in zip(curv, damping, grad):
+            result.append([])
+            for curv_p, grad_p in zip(curv_group, grad_group):
+                result[-1].append((curv_p + damping_group) * grad_p)
+        return result
+
+class HesScaleCurvature(HesScaleCurvatureBase):
     def __init__(self, param_groups):
-        super().__init__(param_groups, HesScale)
+        super().__init__(param_groups, HesScale, max_or_abs='abs')
 
 class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls):
