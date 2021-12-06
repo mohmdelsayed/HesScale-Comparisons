@@ -314,3 +314,4 @@ code/plots/**/*dampings*.tex
 *.tex.preview_BB.txt 
 *.pdf
 .*
+env/*
