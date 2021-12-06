@@ -1,7 +1,7 @@
 import pprint
 
 import bpoptim
-
+import shutil, os
 from .grid_search import BPGridSearch
 from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
                      TuningDiagGGNExact, TuningDiagGGNMC, TuningFancyDamping,
@@ -9,11 +9,13 @@ from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
                      TuningZero)
 
 PROBLEMS = [
-    'localtestproblem',
-    'mnist_logreg',
-    # 'fmnist_2c2d',
-    # 'cifar10_3c3d',
-    # 'cifar100_allcnnc',
+    'cifar10_3c3d_custom',
+    'cifar100_3c3d_custom',
+    'cifar100_allcnnc_custom',
+    'fmnist_2c2d_custom',
+    'fmnist_mlp_custom',
+    'mnist_2c2d_custom',
+    'mnist_mlp_custom',
 ]
 
 BATCH_SIZES = [
@@ -43,8 +45,8 @@ class GridSearchFactory():
         DiagGGNMC,
         DiagGGNExact,
         HesScale,
-        # KFAC,
-        # KFLR,
+        KFAC,
+        KFLR,
     ]
 
     CURVATURES_TUNING = {
@@ -81,7 +83,13 @@ class GridSearchFactory():
                          generation_dir="../grid_search_command_scripts"):
         optim_cls = self._get_damped_optimizer(curv_str, damping_str)
         tune_curv, tune_damping = self.get_tunings(curv_str, damping_str)
-
+        if not os.path.exists(generation_dir):
+            os.mkdir(generation_dir)
+        srcs = "../../libraries/backpack-deepobs-integration/bp_dops_integration/custom/"
+        files = os.listdir(srcs)
+        for f in files:
+            if os.path.isfile(srcs+f):
+                shutil.copy(srcs+f, generation_dir)
         return BPGridSearch(deepobs_problem,
                             optim_cls,
                             tune_curv,

@@ -1,41 +1,14 @@
-from deepobs.pytorch.testproblems.testproblem import UnregularizedTestproblem
 
 # -*- coding: utf-8 -*-
 """A vanilla MLP architecture for MNIST."""
 
 from torch import nn
-from deepobs.pytorch.datasets.mnist import mnist
 import warnings
-    
-    
+from testproblems_modules import net_mlp
+from mnist import mnist
+from deepobs.pytorch.testproblems.testproblem import UnregularizedTestproblem
 
-class net_mlp(nn.Sequential):
-    """  A basic MLP architecture. The network is build as follows:
-
-    - Four fully-connected layers with ``1000``, ``500``,``100`` and ``num_outputs``
-      units per layer, where ``num_outputs`` is the number of ouputs (i.e. class labels).
-    - The first three layers use Tanh activation, and the last one a softmax
-      activation.
-    - The biases are initialized to ``0.0`` and the weight matrices with
-      truncated normal (standard deviation of ``3e-2``)"""
-    def __init__(self, num_outputs):
-        super(net_mlp, self).__init__()
-
-        self.add_module('flatten', nn.Flatten())
-        self.add_module('dense1', nn.Linear(784, 1000))
-        self.add_module('tanh1', nn.ReLU())
-        self.add_module('dense2', nn.Linear(1000, 500))
-        self.add_module('tanh2', nn.ReLU())
-        self.add_module('dense3', nn.Linear(500, 100))
-        self.add_module('tanh3', nn.ReLU())
-        self.add_module('dense4', nn.Linear(100, num_outputs))
-
-        # for module in self.modules():
-        #     if isinstance(module, nn.Linear):
-        #         nn.init.constant_(module.bias, 0.0)
-        #         module.weight.data = _truncated_normal_init(module.weight.data, mean = 0, stddev=3e-2)
-                
-class localtestproblem(UnregularizedTestproblem):
+class mnist_mlp_custom(UnregularizedTestproblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
     on Fashion-MNIST.
 
@@ -69,7 +42,7 @@ class localtestproblem(UnregularizedTestproblem):
           weight_decay (float): No weight decay (L2-regularization) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(localtestproblem, self).__init__(batch_size, weight_decay)
+        super(mnist_mlp_custom, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
             warnings.warn(
@@ -81,7 +54,7 @@ class localtestproblem(UnregularizedTestproblem):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
         self.loss_function = nn.CrossEntropyLoss
-        self.net = net_mlp(num_outputs=10)
+        self.net = net_mlp(num_outputs=10, use_tanh=True)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
 
