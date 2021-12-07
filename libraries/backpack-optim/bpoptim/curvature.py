@@ -194,10 +194,14 @@ class HesScaleCurvatureBase(BackpackCurvatureEstimator):
                 result[-1].append((curv_p + damping_group) * grad_p)
         return result
 
-class HesScaleCurvature(HesScaleCurvatureBase):
+class HesScaleCurvatureAbs(HesScaleCurvatureBase):
     def __init__(self, param_groups):
         super().__init__(param_groups, HesScale, max_or_abs='abs')
 
+class HesScaleCurvatureMax(HesScaleCurvatureBase):
+    def __init__(self, param_groups):
+        super().__init__(param_groups, HesScale, max_or_abs='max')
+        
 class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, bp_extension_cls):
         use_factors = True

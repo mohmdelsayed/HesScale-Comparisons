@@ -7,16 +7,22 @@ from .curvature import (
     DiagGGNExactCurvature,
     DiagGGNMCCurvature,
     ZeroCurvature,
-    HesScaleCurvature,
+    HesScaleCurvatureMax,
+    HesScaleCurvatureAbs,
     KFACCurvature,
     KFLRCurvature,
     KFRACurvature,
 )
 
 
-def HesScaleConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
+def HesScaleConstantDampingOptimizerAbs(params, lr=1, damping=0.1, **kwargs):
     return ConstantDampingOptimizer(
-        params, HesScaleCurvature, lr=lr, damping=damping, **kwargs
+        params, HesScaleCurvatureAbs, lr=lr, damping=damping, **kwargs
+    )
+
+def HesScaleConstantDampingOptimizerMax(params, lr=1, damping=0.1, **kwargs):
+    return ConstantDampingOptimizer(
+        params, HesScaleCurvatureMax, lr=lr, damping=damping, **kwargs
     )
 
 
