@@ -16,35 +16,34 @@ PROBLEMS = [
     'fmnist_mlp_custom',
     'mnist_2c2d_custom',
     'mnist_mlp_custom',
+    'mnist_logreg_custom',
 ]
 
-BATCH_SIZES = [
-    # None,
-    # 64,
-    128,
-    # 256,
-    # 512,
-]
+DEFAULT_TEST_PROBLEMS_SETTINGS = {
+    "cifar10_3c3d_custom": {"batch_size": 128, "num_epochs": 100},
+    'cifar100_3c3d_custom': {"batch_size": 128, "num_epochs": 200},
+    "cifar100_allcnnc_custom": {"batch_size": 256, "num_epochs": 350},
+    "mnist_2c2d_custom": {"batch_size": 128, "num_epochs": 100},
+    "mnist_mlp_custom": {"batch_size": 128, "num_epochs": 100},
+    "mnist_logreg_custom": {"batch_size": 128, "num_epochs": 50},
+    "fmnist_mlp_custom": {"batch_size": 128, "num_epochs": 100},
+    "fmnist_2c2d_custom": {"batch_size": 128, "num_epochs": 100},
+}
 
-NUM_EPOCHS = [
-    # None,
-    50,
-    # 128,
-    # 256,
-    # 512,
-]
 class GridSearchFactory():
     Zero = "Zero"
     DiagGGNExact = "DiagGGN"
     DiagGGNMC = "DiagGGN_MC"
-    HesScale = "HesScale"
+    HesScaleAbs = "HesScaleAbs"
+    HesScaleMax = "HesScaleMax"
     KFAC = "KFAC"
     KFLR = "KFLR"
     CURVATURES = [
         # Zero,
         DiagGGNMC,
         DiagGGNExact,
-        HesScale,
+        HesScaleAbs,
+        HesScaleMax,
         KFAC,
         KFLR,
     ]
@@ -53,7 +52,8 @@ class GridSearchFactory():
         Zero: TuningZero,
         DiagGGNExact: TuningDiagGGNExact,
         DiagGGNMC: TuningDiagGGNMC,
-        HesScale: TuningDiagGGNMC,
+        HesScaleAbs: TuningDiagGGNMC,
+        HesScaleMax: TuningDiagGGNMC,
         KFAC: TuningKFAC,
         KFLR: TuningKFLR,
     }
@@ -70,7 +70,8 @@ class GridSearchFactory():
         (Zero, CONSTANT): bpoptim.ZeroConstantDampingOptimizer,
         (DiagGGNExact, CONSTANT): bpoptim.DiagGGNConstantDampingOptimizer,
         (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCConstantDampingOptimizer,
-        (HesScale, CONSTANT): bpoptim.HesScaleConstantDampingOptimizer,
+        (HesScaleAbs, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerAbs,
+        (HesScaleMax, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerMax,
         (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,
         (KFLR, CONSTANT): bpoptim.KFLRConstantDampingOptimizer,
     }

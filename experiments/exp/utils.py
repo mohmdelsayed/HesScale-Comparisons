@@ -6,8 +6,8 @@ import os
 
 ##############################################################################
 # grid search
-from bp_dops_integration.experiments import (BATCH_SIZES, PROBLEMS,
-                                             GridSearchFactory, NUM_EPOCHS)
+from bp_dops_integration.experiments import (PROBLEMS,
+                                             GridSearchFactory, DEFAULT_TEST_PROBLEMS_SETTINGS)
 
 DAMPINGS = GridSearchFactory.DAMPINGS
 CURVATURES = GridSearchFactory.CURVATURES

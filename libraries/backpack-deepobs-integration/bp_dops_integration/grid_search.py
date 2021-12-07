@@ -101,24 +101,18 @@ class BPGridSearchBase():
                           ressources=INFINITY,
                           runner=self.runner_cls)
 
-    def create_runscript_multi_batch(self, batch_sizes, num_epochs, grid, **kwargs):
+    def create_runscript_multi_batch(self, DEFAULT_TEST_PROBLEMS_SETTINGS, grid, **kwargs):
         """Grid search over batch size on top."""
         script_str = ""
-        for (batch_size, num_epoch) in zip(batch_sizes, num_epochs):
-            # accumulate jobs for different batch sizes
-            if batch_size is None:
-                batch_size = dobs_config.get_testproblem_default_setting(
-                    self.deepobs_problem)["batch_size"]
-            if num_epoch is None:
-                num_epoch = dobs_config.get_testproblem_default_setting(
-                    self.deepobs_problem)["num_epochs"]
-            script_file = self.create_runscript(grid,
-                                                batch_size=batch_size,
-                                                num_epochs=num_epoch,
-                                                **kwargs)
+        
+        # accumulate jobs for different batch sizes
+        script_file = self.create_runscript(grid,
+                                            batch_size=DEFAULT_TEST_PROBLEMS_SETTINGS[self.deepobs_problem]["batch_size"],
+                                            num_epochs=DEFAULT_TEST_PROBLEMS_SETTINGS[self.deepobs_problem]["num_epochs"],
+                                            **kwargs)
 
-            with open(script_file, "r") as file:
-                script_str += file.read()
+        with open(script_file, "r") as file:
+            script_str += file.read()
 
         with open(script_file, "w") as file:
             file.write(script_str)
@@ -275,7 +269,7 @@ class BPGridSearch(BPGridSearchBase):
         self.tune_curv = tune_curv
         self.tune_damping = tune_damping
 
-    def create_runscript_multi_batch(self, batch_sizes, num_epochs, grid=None, **kwargs):
+    def create_runscript_multi_batch(self, DEFAULT_TEST_PROBLEMS_SETTINGS, grid=None, **kwargs):
         """Generate script with runs over `grid` for multiple batch sizes.
 
         Use grid defined by `self.tune_curv` and `self.tune_damping` as
@@ -284,7 +278,7 @@ class BPGridSearch(BPGridSearchBase):
         """
         if grid is None:
             grid = self._get_grid()
-        return super().create_runscript_multi_batch(batch_sizes, num_epochs, grid,
+        return super().create_runscript_multi_batch(DEFAULT_TEST_PROBLEMS_SETTINGS, grid,
                                                     **kwargs)
 
     def create_runscript(self, grid=None, **kwargs):

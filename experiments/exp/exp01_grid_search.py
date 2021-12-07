@@ -1,13 +1,13 @@
 """Generate grid search run scripts."""
 
 from bp_dops_integration.experiments import GridSearchFactory
-from utils import BATCH_SIZES, NUM_EPOCHS, allowed_combinations
+from utils import DEFAULT_TEST_PROBLEMS_SETTINGS, allowed_combinations
 
 
 def create_runscripts(filter_func=None):
     """Write the runscripts to execute all experiments."""
     for search in create_grid_search(filter_func=filter_func):
-        search.create_runscript_multi_batch(BATCH_SIZES, NUM_EPOCHS)
+        search.create_runscript_multi_batch(DEFAULT_TEST_PROBLEMS_SETTINGS)
 
 
 def create_grid_search(filter_func=None):
