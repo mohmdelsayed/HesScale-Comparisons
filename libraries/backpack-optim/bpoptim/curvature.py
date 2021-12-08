@@ -179,7 +179,7 @@ class HesScaleCurvatureBase(BackpackCurvatureEstimator):
                 if self.max_or_abs == 'abs':
                     curv_p.abs_()
                 elif self.max_or_abs == 'max':
-                    torch_max(curv_p, tensor([0.0]), out=curv_p)
+                    torch_max(curv_p, tensor([0.0], device=curv_p.device), out=curv_p)
                 else:
                     raise "No valid HesScale Operation!"
                 inv_curv[-1].append(1 / (curv_p + damping_group))
