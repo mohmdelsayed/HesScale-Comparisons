@@ -6,7 +6,7 @@ from deepobs.pytorch.testproblems.testproblem import TestProblem
 from deepobs.pytorch.datasets.cifar100 import cifar100
 from testproblems_modules import net_cifar100_allcnnc
 
-class cifar100_allcnnc_custom(TestProblem):
+class cifar100_allcnnc_tanh(TestProblem):
     """DeepOBS test problem class for the All Convolutional Neural Network C
   on Cifar-100.
 
@@ -43,7 +43,7 @@ class cifar100_allcnnc_custom(TestProblem):
               Defaults to ``5e-4``.
         """
 
-        super(cifar100_allcnnc_custom, self).__init__(batch_size, weight_decay)
+        super(cifar100_allcnnc_tanh, self).__init__(batch_size, weight_decay)
 
     def set_up(self):
         """Set up the All CNN C test problem on Cifar-100."""

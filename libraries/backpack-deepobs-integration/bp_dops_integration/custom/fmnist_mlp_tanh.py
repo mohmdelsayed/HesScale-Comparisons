@@ -7,7 +7,7 @@ from deepobs.pytorch.datasets.fmnist import fmnist
 from deepobs.pytorch.testproblems.testproblem import UnregularizedTestproblem
 import warnings
 
-class fmnist_mlp_custom(UnregularizedTestproblem):
+class fmnist_mlp_tanh(UnregularizedTestproblem):
     """DeepOBS test problem class for a multi-layer perceptron neural network\
     on Fashion-MNIST.
 
@@ -41,7 +41,7 @@ class fmnist_mlp_custom(UnregularizedTestproblem):
           weight_decay (float): No weight decay (L2-regularization) is used in this
               test problem. Defaults to ``None`` and any input here is ignored.
         """
-        super(fmnist_mlp_custom, self).__init__(batch_size, weight_decay)
+        super(fmnist_mlp_tanh, self).__init__(batch_size, weight_decay)
 
         if weight_decay is not None:
             warnings.warn(
