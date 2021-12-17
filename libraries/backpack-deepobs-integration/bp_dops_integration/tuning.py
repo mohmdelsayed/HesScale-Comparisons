@@ -63,10 +63,14 @@ class TuningKFRA(NoTuning):
 class TuningBaseDamping(TuningBase):
     """Grid search over damping scheme hyperparameters."""
     LEARNING_RATES = list(numpy.logspace(-4, 0, 5))
-    DAMPINGS = list(numpy.logspace(-4, 1, 6))
+    DAMPINGS = [1e-8]
+    BETA1s = [0.9, 0.0]
+    BETA2s = [0.99, 0.999, 0.9999]
 
     LEARNING_RATE_STR = "lr"
     DAMPING_STR = "damping"
+    BETA1_STR = "beta1"
+    BETA2_STR = "beta2"
 
     def _learning_rate_info(self):
         return {self.LEARNING_RATE_STR: {**self.parameter_type_float()}}
@@ -84,16 +88,35 @@ class TuningBaseDamping(TuningBase):
             self.DAMPING_STR: self.DAMPINGS,
         }
 
+    def _beta1_info(self):
+        return {self.BETA1_STR: {**self.parameter_type_float()}}
+
+    def _beta1_grid(self):
+        return {
+            self.BETA1_STR: self.BETA1s,
+        }
+
+    def _beta2_info(self):
+        return {self.BETA2_STR: {**self.parameter_type_float()}}
+
+    def _beta2_grid(self):
+        return {
+            self.BETA2_STR: self.BETA2s,
+        }
     def default_hyperparams(self):
         return {
             **self._learning_rate_info(),
             **self._damping_info(),
+            **self._beta1_info(),
+            **self._beta2_info(),
         }
 
     def default_grid(self):
         return {
             **self._learning_rate_grid(),
             **self._damping_grid(),
+            **self._beta1_grid(),
+            **self._beta2_grid(),
         }
 
     @staticmethod
