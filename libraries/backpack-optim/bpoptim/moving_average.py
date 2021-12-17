@@ -38,6 +38,9 @@ class MovingAverage():
         # estimate initialization:
         self.estimate = None
 
+    def set_estimate(self, estimate):
+        self.estimate = estimate
+        
     def get(self):    
         if self.adam_style:
             if self.use_factors:

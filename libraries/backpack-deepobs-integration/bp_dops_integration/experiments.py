@@ -4,58 +4,81 @@ import bpoptim
 import shutil, os
 from .grid_search import BPGridSearch
 from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
-                     TuningDiagGGNExact, TuningDiagGGNMC, TuningFancyDamping,
-                     TuningKFAC, TuningKFLR, TuningKFRA, TuningLMDamping, 
-                     TuningZero)
+                     NoTuning)
 
 PROBLEMS = [
-    'cifar10_3c3d_custom',
-    'cifar100_3c3d_custom',
-    'cifar100_allcnnc_custom',
-    'fmnist_2c2d_custom',
-    'fmnist_mlp_custom',
-    'mnist_2c2d_custom',
-    'mnist_mlp_custom',
+    # 'cifar10_3c3d_tanh',
+    # 'cifar10_3c3d_relu',
+    # 'cifar100_3c3d_tanh',
+    # 'cifar100_3c3d_relu',
+    # 'cifar100_allcnnc_tanh',
+    # 'cifar100_allcnnc_relu',
+    # 'fmnist_2c2d_tanh',
+    # 'fmnist_2c2d_relu',
+    # 'fmnist_mlp_tanh',
+    # 'fmnist_mlp_relu',
+    # 'mnist_2c2d_tanh',
+    # 'mnist_2c2d_relu',
+    # 'mnist_mlp_tanh',
+    # 'mnist_mlp_relu',
     'mnist_logreg_custom',
 ]
 
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
-    "cifar10_3c3d_custom": {"batch_size": 128, "num_epochs": 100},
-    'cifar100_3c3d_custom': {"batch_size": 128, "num_epochs": 200},
-    "cifar100_allcnnc_custom": {"batch_size": 256, "num_epochs": 350},
-    "mnist_2c2d_custom": {"batch_size": 128, "num_epochs": 100},
-    "mnist_mlp_custom": {"batch_size": 128, "num_epochs": 100},
+    "cifar10_3c3d_tanh": {"batch_size": 128, "num_epochs": 100},
+    "cifar10_3c3d_relu": {"batch_size": 128, "num_epochs": 100},
+    'cifar100_3c3d_tanh': {"batch_size": 128, "num_epochs": 200},
+    'cifar100_3c3d_relu': {"batch_size": 128, "num_epochs": 200},
+    "cifar100_allcnnc_tanh": {"batch_size": 256, "num_epochs": 350},
+    "cifar100_allcnnc_relu": {"batch_size": 256, "num_epochs": 350},
+    "mnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
+    "mnist_2c2d_relu": {"batch_size": 128, "num_epochs": 100},
+    "mnist_mlp_tanh": {"batch_size": 128, "num_epochs": 100},
+    "mnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
     "mnist_logreg_custom": {"batch_size": 128, "num_epochs": 50},
-    "fmnist_mlp_custom": {"batch_size": 128, "num_epochs": 100},
-    "fmnist_2c2d_custom": {"batch_size": 128, "num_epochs": 100},
+    "fmnist_mlp_tanh": {"batch_size": 128, "num_epochs": 100},
+    "fmnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
+    "fmnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
+    "fmnist_2c2d_relu": {"batch_size": 128, "num_epochs": 100},
 }
 
 class GridSearchFactory():
     Zero = "Zero"
     DiagGGNExact = "DiagGGN"
     DiagGGNMC = "DiagGGN_MC"
-    HesScaleAbs = "HesScaleAbs"
     HesScaleMax = "HesScaleMax"
     KFAC = "KFAC"
-    KFLR = "KFLR"
+    Adam = "Adam"
+    Adam2 = "Adam2"
+    SGD = "SGD"
+    SGD2 = "SGD2"
+    HesScaleAdamStyle = "HesScaleAdamStyle"
+    AdaHessian = "AdaHessian"
     CURVATURES = [
-        # Zero,
-        DiagGGNMC,
-        DiagGGNExact,
-        HesScaleAbs,
+        Adam,
+        Adam2,
+        SGD,
+        SGD2,
         HesScaleMax,
-        KFAC,
-        KFLR,
+        HesScaleAdamStyle,
+        # DiagGGNMC,
+        # DiagGGNExact,
+        # KFAC,
+        # AdaHessian,
     ]
 
     CURVATURES_TUNING = {
-        Zero: TuningZero,
-        DiagGGNExact: TuningDiagGGNExact,
-        DiagGGNMC: TuningDiagGGNMC,
-        HesScaleAbs: TuningDiagGGNMC,
-        HesScaleMax: TuningDiagGGNMC,
-        KFAC: TuningKFAC,
-        KFLR: TuningKFLR,
+        Zero: NoTuning,
+        DiagGGNExact: NoTuning,
+        DiagGGNMC: NoTuning,
+        HesScaleMax: NoTuning,
+        KFAC: NoTuning,
+        Adam: NoTuning,
+        SGD: NoTuning,
+        HesScaleAdamStyle: NoTuning,
+        AdaHessian: NoTuning,
+        Adam2: NoTuning,
+        SGD2: NoTuning,
     }
 
     CONSTANT = "const"
@@ -67,13 +90,16 @@ class GridSearchFactory():
     }
 
     DAMPED_OPTIMS = {
-        (Zero, CONSTANT): bpoptim.ZeroConstantDampingOptimizer,
         (DiagGGNExact, CONSTANT): bpoptim.DiagGGNConstantDampingOptimizer,
         (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCConstantDampingOptimizer,
-        (HesScaleAbs, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerAbs,
         (HesScaleMax, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerMax,
         (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,
-        (KFLR, CONSTANT): bpoptim.KFLRConstantDampingOptimizer,
+        (Adam, CONSTANT): bpoptim.AdamConstantDampingOptimizer,
+        (SGD, CONSTANT): bpoptim.SGDConstantDampingOptimizer,
+        (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerAdamStyle,
+        (AdaHessian, CONSTANT): bpoptim.AdaHessConstantDampingOptimizer,
+        (Adam2, CONSTANT): bpoptim.Adam2ConstantDampingOptimizer,
+        (SGD2, CONSTANT): bpoptim.SGD2ConstantDampingOptimizer,
     }
 
     def make_grid_search(self,
