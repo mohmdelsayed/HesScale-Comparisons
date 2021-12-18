@@ -6,9 +6,9 @@ from io import StringIO
 import pandas
 
 import deepobs.analyzer.analyze as analyze
-from exp01_grid_search import BATCH_SIZES, create_grid_search
+from exp01_grid_search import create_grid_search
 from utils import PROBLEMS
-
+BATCH_SIZES = [128]
 
 def multi_batch_grid_dims(filter_func=None):
     """Dimension of the grid, including the batch sizes."""
@@ -108,8 +108,8 @@ def check_grid_search_manually():
     check_manually(get_results_path())
 
 
-def check_grid_search_each_run_has_1_seed():
-    return check_each_run_has_num_seeds(1, get_results_path())
+def check_grid_search_each_run_has_n_seed(n):
+    return check_each_run_has_num_seeds(n, get_results_path())
 
 
 def check_grid_search_complete(filter_func=None):
@@ -165,7 +165,7 @@ def summarize_grid_search_progress():
 if __name__ == "__main__":
     check_grid_search_manually()
     print_dashed_line()
-    single_seed = check_grid_search_each_run_has_1_seed()
+    single_seed = check_grid_search_each_run_has_n_seed(2)
     print_dashed_line()
     summary = summarize_grid_search_progress()
 
