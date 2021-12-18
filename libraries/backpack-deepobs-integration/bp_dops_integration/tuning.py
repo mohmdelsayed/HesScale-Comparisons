@@ -13,7 +13,7 @@ Notes:
 """
 from contextlib import contextmanager
 
-import numpy
+import numpy, random
 
 from .tuning_base import TuningBase
 
@@ -66,8 +66,10 @@ class TuningBaseDamping(TuningBase):
     DAMPINGS = [1e-8]
     BETA1s = [0.9, 0.0]
     BETA2s = [0.99, 0.999, 0.9999]
+    SEEDS = random.sample(range(0, 99999), 30)
 
     LEARNING_RATE_STR = "lr"
+    SEEDS_STR = "random_seed"
     DAMPING_STR = "damping"
     BETA1_STR = "beta1"
     BETA2_STR = "beta2"
@@ -78,6 +80,13 @@ class TuningBaseDamping(TuningBase):
     def _learning_rate_grid(self):
         return {
             self.LEARNING_RATE_STR: self.LEARNING_RATES,
+        }
+    def _seed_info(self):
+        return {self.SEEDS_STR: {**self.parameter_type_float()}}
+
+    def _seeds_grid(self):
+        return {
+            self.SEEDS_STR: self.SEEDS,
         }
 
     def _damping_info(self):
@@ -109,6 +118,7 @@ class TuningBaseDamping(TuningBase):
             **self._damping_info(),
             **self._beta1_info(),
             **self._beta2_info(),
+            **self._seed_info(),
         }
 
     def default_grid(self):
@@ -117,11 +127,16 @@ class TuningBaseDamping(TuningBase):
             **self._damping_grid(),
             **self._beta1_grid(),
             **self._beta2_grid(),
+            **self._seeds_grid(),
         }
 
     @staticmethod
     def parameter_type_float():
         return {"type": float}
+    
+    @staticmethod
+    def parameter_type_int():
+        return {"type": int}
 
 
 @contextmanager
