@@ -190,6 +190,13 @@ class HesScaleCurvatureBase(DiagCurvatureBase):
             loss, output = closure()
             loss.backward(retain_graph=retain_graph)
 
+            input_to_avg_grad = list(
+                [
+                    list([p.grad for p in group["params"]])
+                    for group in self.param_groups
+                ]
+            )
+            self.avg_grad.step(input_to_avg_grad)
             if self.style == "max":
                 input_to_avg_hessian = list(
                     [
@@ -211,18 +218,18 @@ class HesScaleCurvatureBase(DiagCurvatureBase):
                         for group in self.param_groups
                     ]
                 )
-                
-            input_to_avg_grad = list(
-                [
-                    list([p.grad for p in group["params"]])
-                    for group in self.param_groups
-                ]
-            )
+            if self.style == "no_h_update":
+                if self.avg_hessian.step_counter == 0:
+                    old_estimate = self.avg_hessian.initialize(input_to_avg_hessian)
+                else:
+                    old_estimate = self.avg_hessian.get()
+                    
+                self.avg_hessian.step(input_to_avg_hessian)
+                self.avg_hessian.zero_decay(old_estimate, input_to_avg_hessian)
+            else:
+                self.avg_hessian.step(input_to_avg_hessian)
 
-            self.avg_hessian.step(input_to_avg_hessian)
-            self.avg_grad.step(input_to_avg_grad)
-
-        return loss, output
+        return loss, output, input_to_avg_hessian
 class HesScaleCurvatureMax(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScale, style='max')
@@ -230,6 +237,10 @@ class HesScaleCurvatureMax(HesScaleCurvatureBase):
 class HesScaleCurvatureAdamStyle(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScale, style='adam')
+        
+class HesScaleCurvatureZeroHessianUpdate(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='no_h_update')
         
 class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
     def __init__(self, param_groups, beta1, beta2, bp_extension_cls):

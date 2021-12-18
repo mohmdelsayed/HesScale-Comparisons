@@ -38,10 +38,15 @@ class MovingAverage():
         # estimate initialization:
         self.estimate = None
 
-    def set_estimate(self, estimate):
-        self.estimate = estimate
-        
-    def get(self):    
+    def zero_decay(self, old_estimate, hess_example):
+        for i, (curr_est_group, old_est_group, hess_example_group) in enumerate(zip(self.estimate, old_estimate, hess_example)):
+            for j, (curr_est, old_est, hess_ex) in enumerate(zip(curr_est_group, old_est_group, hess_example_group)):
+                if self.use_factors:
+                    for k, (curr_est_factor, old_est_factor, hess_ex_factor) in zip(curr_est, old_est, hess_ex):
+                        self.estimate[i][j][k][hess_ex_factor<0.0] =  old_est_factor[hess_ex_factor<0.0]
+                else:
+                    self.estimate[i][j][hess_ex<0.0] = old_est[hess_ex<0.0]
+    def get(self):
         if self.adam_style:
             if self.use_factors:
                 return [[[m.sqrt() / math.sqrt(self.bias_correction) for m in i] for i in x] for x in self.estimate]

@@ -6,11 +6,13 @@ from .constant_damping import ConstantDampingOptimizer
 from .adahessian import AdaHessianOptimizer
 from .adam import AdamOptimizer
 from .sgd import SGDOptimizer
+from .hesscale_optimizer import HesScaleOptimizer
 from .curvature import (
     DiagGGNExactCurvature,
     DiagGGNMCCurvature,
     HesScaleCurvatureMax,
     HesScaleCurvatureAdamStyle,
+    HesScaleCurvatureZeroHessianUpdate,
     KFACCurvature,
     AdamCurvature,
     SgdCurvature,
@@ -18,16 +20,25 @@ from .curvature import (
 
 
 def HesScaleConstantDampingOptimizerMax(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+    return HesScaleOptimizer(
         params, HesScaleCurvatureMax, lr=lr, damping=damping, **kwargs
     )
 
 
 def HesScaleConstantDampingOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+    return HesScaleOptimizer(
         params, HesScaleCurvatureAdamStyle, lr=lr, damping=damping, **kwargs
     )
 
+def HesScaleConstantDampingOptimizerZeroHessianUpdate(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureZeroHessianUpdate, lr=lr, damping=damping, **kwargs
+    )
+    
+def HesScaleConstantDampingOptimizerNoGradUpdate(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureMax, lr=lr, damping=damping, no_grad_update=True, **kwargs
+    )
 
 def DiagGGNConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
     return ConstantDampingOptimizer(
