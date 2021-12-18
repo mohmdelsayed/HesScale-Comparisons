@@ -82,7 +82,7 @@ class TuningBaseDamping(TuningBase):
             self.LEARNING_RATE_STR: self.LEARNING_RATES,
         }
     def _seed_info(self):
-        return {self.SEEDS_STR: {**self.parameter_type_float()}}
+        return {self.SEEDS_STR: {**self.parameter_type_int()}}
 
     def _seeds_grid(self):
         return {
