@@ -31,30 +31,6 @@ class NoTuning(TuningBase):
         return {}
 
 
-class TuningZero(NoTuning):
-    pass
-
-
-class TuningDiagGGNExact(NoTuning):
-    pass
-
-
-class TuningDiagGGNMC(NoTuning):
-    pass
-
-
-class TuningKFAC(NoTuning):
-    pass
-
-
-class TuningKFLR(NoTuning):
-    pass
-
-
-class TuningKFRA(NoTuning):
-    pass
-
-
 ##############################################################################
 # TUNABLE PARAMETERS FOR DAMPING SCHEMES                                     #
 ##############################################################################
@@ -65,8 +41,10 @@ class TuningBaseDamping(TuningBase):
     LEARNING_RATES = list(numpy.logspace(-4, 0, 5))
     DAMPINGS = [1e-8]
     BETA1s = [0.9, 0.0]
-    BETA2s = [0.99, 0.999, 0.9999]
-    SEEDS = random.sample(range(0, 99999), 30)
+    BETA2s = [0.99]
+    start_seed = 1234
+    n_seeds = 2
+    SEEDS = range(start_seed, start_seed + n_seeds)
 
     LEARNING_RATE_STR = "lr"
     SEEDS_STR = "random_seed"
@@ -156,48 +134,7 @@ def use_1d_dummy_grid_for_damping(lrs=[0.1234], dampings=[5.678]):
         TuningBaseDamping.DAMPINGS = orig_dampings
 
 
-class TuningConstantDamping(TuningBaseDamping):
-    pass
+class TuningConstantDampingNoCurvature(TuningBaseDamping):
+    BETA1s = [0.0]
+    BETA2s = [0.0]
 
-
-class TuningConstantDampingNoCurvature(TuningConstantDamping):
-    DAMPINGS = [1.]
-
-
-class TuningAdaptiveDamping(TuningBaseDamping):
-    MINIMUM_DAMPINGS = [1e-4]
-    MINIMUM_DAMPING_STR = "minimum_damping"
-
-    def _minimum_damping_info(self):
-        return {self.MINIMUM_DAMPING_STR: {**self.parameter_type_float()}}
-
-    def _minimum_damping_grid(self):
-        return {
-            self.MINIMUM_DAMPING_STR: self.MINIMUM_DAMPINGS,
-        }
-
-    def default_hyperparams(self):
-        return {
-            **super(TuningAdaptiveDamping, self).default_hyperparams(),
-            **self._minimum_damping_info()
-        }
-
-    def default_grid(self):
-        return {
-            **super(TuningAdaptiveDamping, self).default_grid(),
-            **self._minimum_damping_grid(),
-        }
-
-
-class TuningLMDamping(TuningAdaptiveDamping):
-    DAMPING_STR = "initial_damping"
-
-
-class TuningFancyDamping(TuningAdaptiveDamping):
-    DAMPING_STR = "initial_trust_damping"
-
-    def _learning_rate_grid(self):
-        return {}
-
-    def _learning_rate_info(self):
-        return {}

@@ -128,8 +128,8 @@ def _allowed_combinations(dampings, problems, curvatures, filter_func=None):
 
 def _exclude(damping, problem, curvature):
     """Return whether the run should be excluded."""
-    def is_zero(curvature):
-        return curvature == GridSearchFactory.Zero
+    def is_SGD(curvature):
+        return curvature == GridSearchFactory.SGD or curvature == GridSearchFactory.SGD2
 
     def is_kfra(curvature):
         return curvature == GridSearchFactory.KFRA
@@ -155,13 +155,9 @@ def _exclude(damping, problem, curvature):
     def is_lm(damping):
         return damping == GridSearchFactory.LM
 
-    def exclude_zero(damping, problem, curvature):
-        return is_zero(curvature)
+    def exclude_SGD(damping, problem, curvature):
+        return is_SGD(curvature)
 
-    def exclude_lm_and_fancy(damping, problem, curvature):
-        lm = is_lm(damping)
-        fancy = is_fancy(damping)
-        return lm or fancy
 
     def exclude_KFRA_for_fmnist_cifar10_cifar100(damping, problem, curvature):
         kfra = is_kfra(curvature)
@@ -182,8 +178,7 @@ def _exclude(damping, problem, curvature):
 
     # add more criteria to exclude runs
     criteria = [
-        exclude_zero,
-        # exclude_lm_and_fancy,
+        # exclude_zero,
         # exclude_KFRA_for_fmnist_cifar10_cifar100,
         exclude_DiagGGNExact_for_cifar100,
         # exclude_KFLR_for_cifar100,

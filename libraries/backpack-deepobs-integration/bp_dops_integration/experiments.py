@@ -3,7 +3,7 @@ import pprint
 import bpoptim
 import shutil, os
 from .grid_search import BPGridSearch
-from .tuning import (TuningConstantDamping, TuningConstantDampingNoCurvature,
+from .tuning import (TuningBaseDamping, TuningConstantDampingNoCurvature,
                      NoTuning)
 
 PROBLEMS = [
@@ -43,7 +43,6 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
 }
 
 class GridSearchFactory():
-    Zero = "Zero"
     DiagGGNExact = "DiagGGN"
     DiagGGNMC = "DiagGGN_MC"
     HesScaleMax = "HesScaleMax"
@@ -72,7 +71,6 @@ class GridSearchFactory():
     ]
 
     CURVATURES_TUNING = {
-        Zero: NoTuning,
         DiagGGNExact: NoTuning,
         DiagGGNMC: NoTuning,
         HesScaleMax: NoTuning,
@@ -92,7 +90,7 @@ class GridSearchFactory():
     DAMPINGS = [CONSTANT]
 
     DAMPINGS_TUNING = {
-        CONSTANT: TuningConstantDamping,
+        CONSTANT: TuningBaseDamping,
     }
 
     DAMPED_OPTIMS = {
@@ -141,7 +139,7 @@ class GridSearchFactory():
         tune_damping = self._get_damping_tuning(damping_str)
 
         # no tuning of damping parameter for constant damping and no curvature
-        if curv_str == self.Zero and damping_str == self.CONSTANT:
+        if (curv_str == self.SGD or curv_str == self.SGD2) and damping_str == self.CONSTANT:
             tune_damping = TuningConstantDampingNoCurvature()
 
         return tune_curv, tune_damping
