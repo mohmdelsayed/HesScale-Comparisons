@@ -19,9 +19,9 @@ PROBLEMS = [
     # 'fmnist_mlp_relu',
     # 'mnist_2c2d_tanh',
     # 'mnist_2c2d_relu',
-    # 'mnist_mlp_tanh',
+    'mnist_mlp_tanh',
     # 'mnist_mlp_relu',
-    'mnist_logreg_custom',
+    # 'mnist_logreg_custom',
 ]
 
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
@@ -54,6 +54,8 @@ class GridSearchFactory():
     SGD2 = "SGD2"
     HesScaleAdamStyle = "HesScaleAdamStyle"
     AdaHessian = "AdaHessian"
+    HesScaleNoGradUpdate = "HesScaleNoGradUpdate"
+    HesScaleNoHessianUpdate = "HesScaleNoHessianUpdate"
     CURVATURES = [
         Adam,
         Adam2,
@@ -61,10 +63,12 @@ class GridSearchFactory():
         SGD2,
         HesScaleMax,
         HesScaleAdamStyle,
-        # DiagGGNMC,
-        # DiagGGNExact,
-        # KFAC,
-        # AdaHessian,
+        HesScaleNoHessianUpdate,
+        HesScaleNoGradUpdate,
+        DiagGGNMC,
+        DiagGGNExact,
+        KFAC,
+        AdaHessian,
     ]
 
     CURVATURES_TUNING = {
@@ -79,6 +83,8 @@ class GridSearchFactory():
         AdaHessian: NoTuning,
         Adam2: NoTuning,
         SGD2: NoTuning,
+        HesScaleNoHessianUpdate: NoTuning,
+        HesScaleNoGradUpdate: NoTuning,
     }
 
     CONSTANT = "const"
@@ -92,14 +98,20 @@ class GridSearchFactory():
     DAMPED_OPTIMS = {
         (DiagGGNExact, CONSTANT): bpoptim.DiagGGNConstantDampingOptimizer,
         (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCConstantDampingOptimizer,
+        
         (HesScaleMax, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerMax,
-        (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,
-        (Adam, CONSTANT): bpoptim.AdamConstantDampingOptimizer,
-        (SGD, CONSTANT): bpoptim.SGDConstantDampingOptimizer,
+        (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerZeroHessianUpdate,
+        (HesScaleNoGradUpdate, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerNoGradUpdate,
         (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerAdamStyle,
-        (AdaHessian, CONSTANT): bpoptim.AdaHessConstantDampingOptimizer,
+
+        (Adam, CONSTANT): bpoptim.AdamConstantDampingOptimizer,
         (Adam2, CONSTANT): bpoptim.Adam2ConstantDampingOptimizer,
+
+        (SGD, CONSTANT): bpoptim.SGDConstantDampingOptimizer,
         (SGD2, CONSTANT): bpoptim.SGD2ConstantDampingOptimizer,
+
+        (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,        
+        (AdaHessian, CONSTANT): bpoptim.AdaHessConstantDampingOptimizer,
     }
 
     def make_grid_search(self,
