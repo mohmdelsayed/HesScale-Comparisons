@@ -98,10 +98,10 @@ class NoTuning(TuningBase):
 
 class TuningBaseDamping(TuningBase):
     """Grid search over damping scheme hyperparameters."""
-    LEARNING_RATES = list(numpy.logspace(-4, 0, 5))
+    LEARNING_RATES = list(numpy.logspace(-5, -1, 5))
     DAMPINGS = [1e-8]
-    BETA1s = [0.9, 0.0]
-    BETA2s = [0.99]
+    BETA1s = [0.0, 0.9]
+    BETA2s = [0.99, 0.999, 0.9999]
     start_seed = 1234
     n_seeds = 2
     SEEDS = range(start_seed, start_seed + n_seeds)
