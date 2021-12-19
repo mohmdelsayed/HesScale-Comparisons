@@ -7,6 +7,7 @@ import pandas
 
 import deepobs.analyzer.analyze as analyze
 from exp01_grid_search import create_grid_search
+from bp_dops_integration.tuning import TuningBaseDamping
 from utils import PROBLEMS
 BATCH_SIZES = [128]
 
@@ -163,14 +164,15 @@ def summarize_grid_search_progress():
 
 
 if __name__ == "__main__":
+    n_seeds = len(TuningBaseDamping.LEARNING_RATES)
     check_grid_search_manually()
     print_dashed_line()
-    single_seed = check_grid_search_each_run_has_n_seed(2)
+    single_seed = check_grid_search_each_run_has_n_seed(n_seeds)
     print_dashed_line()
     summary = summarize_grid_search_progress()
 
     print_dashed_line()
     print("GRID SEARCH TEST SUMMARY\n")
     print(summary.to_string(index=False))
-    print("\nFound runs evaluated on single seed: {}".format(single_seed))
+    print("\nFound all runs evaluated on {} seed(s): {}".format(n_seeds, single_seed))
     print_dashed_line()
