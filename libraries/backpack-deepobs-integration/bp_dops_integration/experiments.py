@@ -45,25 +45,31 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
 class GridSearchFactory():
     DiagGGNExact = "DiagGGN"
     DiagGGNMC = "DiagGGN_MC"
-    HesScaleMax = "HesScaleMax"
     KFAC = "KFAC"
     Adam = "Adam"
     Adam2 = "Adam2"
     SGD = "SGD"
     SGD2 = "SGD2"
-    HesScaleAdamStyle = "HesScaleAdamStyle"
     AdaHessian = "AdaHessian"
-    HesScaleNoGradUpdate = "HesScaleNoGradUpdate"
+    
+    HesScaleMax = "HesScaleMax"
+    HesScaleAdamStyle = "HesScaleAdamStyle"
     HesScaleNoHessianUpdate = "HesScaleNoHessianUpdate"
+    HesScaleNoGradUpdateMax = "HesScaleNoGradUpdateMax"
+    HesScaleNoGradUpdateNoHessianUpdate = "HesScaleNoGradUpdateNoHessianUpdate"
+
     CURVATURES = [
         Adam,
         Adam2,
         SGD,
         SGD2,
+        
         HesScaleMax,
         HesScaleAdamStyle,
         HesScaleNoHessianUpdate,
-        HesScaleNoGradUpdate,
+        HesScaleNoGradUpdateMax,
+        HesScaleNoGradUpdateNoHessianUpdate,
+        
         DiagGGNMC,
         DiagGGNExact,
         KFAC,
@@ -73,16 +79,18 @@ class GridSearchFactory():
     CURVATURES_TUNING = {
         DiagGGNExact: NoTuning,
         DiagGGNMC: NoTuning,
-        HesScaleMax: NoTuning,
         KFAC: NoTuning,
         Adam: NoTuning,
         SGD: NoTuning,
-        HesScaleAdamStyle: NoTuning,
         AdaHessian: NoTuning,
         Adam2: NoTuning,
         SGD2: NoTuning,
+
+        HesScaleAdamStyle: NoTuning,
+        HesScaleMax: NoTuning,
         HesScaleNoHessianUpdate: NoTuning,
-        HesScaleNoGradUpdate: NoTuning,
+        HesScaleNoGradUpdateMax: NoTuning,
+        HesScaleNoGradUpdateNoHessianUpdate: NoTuning,
     }
 
     CONSTANT = "const"
@@ -94,22 +102,24 @@ class GridSearchFactory():
     }
 
     DAMPED_OPTIMS = {
-        (DiagGGNExact, CONSTANT): bpoptim.DiagGGNConstantDampingOptimizer,
-        (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCConstantDampingOptimizer,
+        (DiagGGNExact, CONSTANT): bpoptim.DiagGGNDefaultOptimizer,
+        (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCDefaultOptimizer,
         
-        (HesScaleMax, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerMax,
-        (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerZeroHessianUpdate,
-        (HesScaleNoGradUpdate, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerNoGradUpdate,
-        (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleConstantDampingOptimizerAdamStyle,
+        (HesScaleMax, CONSTANT): bpoptim.HesScaleOptimizerMax,
+        (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleOptimizerAdamStyle,
 
-        (Adam, CONSTANT): bpoptim.AdamConstantDampingOptimizer,
-        (Adam2, CONSTANT): bpoptim.Adam2ConstantDampingOptimizer,
+        (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerZeroHessianUpdate,
+        (HesScaleNoGradUpdateMax, CONSTANT): bpoptim.HesScaleOptimizerNoGradUpdateMax,
+        (HesScaleNoGradUpdateNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerNoGradUpdateZeroHessianUpdate,
 
-        (SGD, CONSTANT): bpoptim.SGDConstantDampingOptimizer,
-        (SGD2, CONSTANT): bpoptim.SGD2ConstantDampingOptimizer,
+        (Adam, CONSTANT): bpoptim.AdamDefaultOptimizer,
+        (Adam2, CONSTANT): bpoptim.Adam2DefaultOptimizer,
 
-        (KFAC, CONSTANT): bpoptim.KFACConstantDampingOptimizer,        
-        (AdaHessian, CONSTANT): bpoptim.AdaHessConstantDampingOptimizer,
+        (SGD, CONSTANT): bpoptim.SGDDefaultOptimizer,
+        (SGD2, CONSTANT): bpoptim.SGD2DefaultOptimizer,
+
+        (KFAC, CONSTANT): bpoptim.KFACDefaultOptimizer,
+        (AdaHessian, CONSTANT): bpoptim.AdaHessDefaultOptimizer,
     }
 
     def make_grid_search(self,

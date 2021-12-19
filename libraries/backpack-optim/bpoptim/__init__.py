@@ -2,7 +2,7 @@
 Pytorch optimizers based on BackPACK.
 """
 
-from .constant_damping import ConstantDampingOptimizer
+from .default_optimizer import DefaultOptimizer
 from .adahessian import AdaHessianOptimizer
 from .adam import AdamOptimizer
 from .sgd import SGDOptimizer
@@ -19,65 +19,67 @@ from .curvature import (
 )
 
 
-def HesScaleConstantDampingOptimizerMax(params, lr=1, damping=0.1, **kwargs):
+def HesScaleOptimizerMax(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureMax, lr=lr, damping=damping, **kwargs
     )
 
-
-def HesScaleConstantDampingOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
+def HesScaleOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureAdamStyle, lr=lr, damping=damping, **kwargs
     )
 
-def HesScaleConstantDampingOptimizerZeroHessianUpdate(params, lr=1, damping=0.1, **kwargs):
+def HesScaleOptimizerZeroHessianUpdate(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureZeroHessianUpdate, lr=lr, damping=damping, **kwargs
     )
     
-def HesScaleConstantDampingOptimizerNoGradUpdate(params, lr=1, damping=0.1, **kwargs):
+def HesScaleOptimizerNoGradUpdateMax(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureMax, lr=lr, damping=damping, no_grad_update=True, **kwargs
     )
-
-def DiagGGNConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
-        params, DiagGGNExactCurvature, lr=lr, damping=damping, **kwargs
+def HesScaleOptimizerNoGradUpdateZeroHessianUpdate(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureZeroHessianUpdate, lr=lr, damping=damping, no_grad_update=True, **kwargs
     )
 
-
-def AdamConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+def AdamDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return DefaultOptimizer(
         params, AdamCurvature, lr=lr, damping=damping, **kwargs
     )
 
 
-def Adam2ConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
+def Adam2DefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
     return AdamOptimizer(params, lr=lr, damping=damping, **kwargs)
 
 
-def SGDConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+def SGDDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return DefaultOptimizer(
         params, SgdCurvature, lr=lr, damping=damping, **kwargs
     )
 
 
-def SGD2ConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
+def SGD2DefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
     return SGDOptimizer(params, lr=lr, damping=damping, **kwargs)
 
 
-def AdaHessConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
+def AdaHessDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
     return AdaHessianOptimizer(params, lr=lr, damping=damping, **kwargs)
 
 
-def DiagGGNMCConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+def DiagGGNDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return DefaultOptimizer(
+        params, DiagGGNExactCurvature, lr=lr, damping=damping, **kwargs
+    )
+
+def DiagGGNMCDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return DefaultOptimizer(
         params, DiagGGNMCCurvature, lr=lr, damping=damping, **kwargs
     )
 
 
-def KFACConstantDampingOptimizer(params, lr=1, damping=0.1, **kwargs):
-    return ConstantDampingOptimizer(
+def KFACDefaultOptimizer(params, lr=1, damping=0.1, **kwargs):
+    return DefaultOptimizer(
         params, KFACCurvature, lr=lr, damping=damping, **kwargs
     )
 

@@ -1,7 +1,7 @@
 from .base_optimizer import BaseOptimizer
 
 
-class ConstantDampingOptimizer(BaseOptimizer):
+class DefaultOptimizer(BaseOptimizer):
     def __init__(self,
                  params,
                  curvature,
