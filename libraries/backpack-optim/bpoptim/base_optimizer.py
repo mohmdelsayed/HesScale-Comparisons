@@ -9,12 +9,12 @@ from .utils import flatten, inner_product
 
 class BaseOptimizer(Optimizer):
 
-    def __init__(self, params, defaults, curvature):
+    def __init__(self, params, defaults, curvature, beta1=0.9, beta2=0.999):
         self.param_groups = None
         super().__init__(params, defaults=defaults)
 
         # Create curv after __init__: need the param_groups to exists
-        self.curv = curvature(self.param_groups)
+        self.curv = curvature(self.param_groups, beta1, beta2)
         self.inv_curv = None
 
         # information about the last step

@@ -8,9 +8,9 @@ CHOICES = PROBLEMS + [ALL]
 
 parser = argparse.ArgumentParser(description="Choose the DeepOBS problem")
 
-parser.add_argument("--dobs_problem",
+parser.add_argument("--problem",
                     type=str,
-                    default="all",
+                    default="mnist_mlp_tanh",
                     choices=CHOICES,
                     help=f"DeepOBS problem")
 
@@ -19,7 +19,7 @@ def make_filter_func():
     ARGS, LEFT = parser.parse_known_args()
     sys.argv = [sys.argv[0], *LEFT]
 
-    choice = ARGS.dobs_problem
+    choice = ARGS.problem
 
     def filter_func(curv, damp, prob):
         # all problems

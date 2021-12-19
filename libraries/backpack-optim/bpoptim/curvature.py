@@ -20,18 +20,19 @@ from hesscale import HesScale
 from .utils import NUMERICAL_STABILITY_CONSTANT
 from .inverse_curvature import (
     DiagonalInverseCurvature,
-    ScalarInverseCurvature,
     KroneckerInverseCurvature,
 )
 from .moving_average import MovingAverage
 
 
 class CurvatureEstimator:
-    def __init__(self, param_groups):
+    def __init__(self, param_groups, beta1, beta2):
         """
         param_groups: the param_groups of the optimizer using the estimator
         """
         self.param_groups = param_groups
+        self.beta1 = beta1
+        self.beta2 = beta2
 
     def compute_curvature(self, closure):
         """
@@ -50,62 +51,75 @@ class CurvatureEstimator:
         """
         raise NotImplementedError
 
-    def multiply(self, damping, grad):
-        """
-        Multiply the grad vector by the damped curvature,
-        where damping and grad are in [group[parameter]] format;
-        ```
-        grad = [           # for each group
-            [              # for each parameter in the group
-                vec,       # the value for that parameter
-                ...
-            ],
-            ...
-        ]
-        ```
-        """
-        raise NotImplementedError
-
-
-class ZeroCurvature(CurvatureEstimator):
-    def __init__(self, param_groups):
-        super().__init__(param_groups)
-        self.curv = self._get_curv()
-
-    def _get_curv(self):
-        ZERO = 0.0
-        curv = list(
-            [list([ZERO for p in group["params"]]) for group in self.param_groups]
-        )
-        return curv
+class SgdCurvature:
+    def __init__(self, param_groups, beta1=0.0, beta2=0.0):
+        self.param_groups = param_groups
 
     def compute_curvature(self, closure, retain_graph=False):
         loss, output = closure()
         loss.backward(retain_graph=retain_graph)
         return loss, output
 
-    def compute_inverse(self, damping):
-        inv_curv = []
+    def compute_inverse(self, damping=0.0):
+        grad = list(
+            [
+                list([p.grad for p in group["params"]])
+                for group in self.param_groups
+            ]
+        )
+        curv = list(
+            [
+                list([1.0 for p in group["params"]])
+                for group in self.param_groups
+            ]
+        )
+        return DiagonalInverseCurvature(curv, grad)
 
-        for curv_group, damping_group in zip(self.curv, damping):
+class AdamCurvature(CurvatureEstimator):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2)
+        self.avg_grad = MovingAverage(param_groups, beta=beta1, use_factors=False)
+        self.avg_hessian = MovingAverage(param_groups, beta=beta2, use_factors=False, adam_style=True)
+
+    def compute_curvature(self, closure, retain_graph=False):
+        loss, output = closure()
+        loss.backward(retain_graph=retain_graph)
+
+        input_to_avg_hessian = list(
+            [
+                list([p.grad.data ** 2 for p in group["params"]])
+                for group in self.param_groups
+            ]
+        )
+        input_to_avg_grad = list(
+            [
+                list([p.grad.data for p in group["params"]])
+                for group in self.param_groups
+            ]
+        )
+
+        self.avg_hessian.step(input_to_avg_hessian)
+        self.avg_grad.step(input_to_avg_grad)
+
+        return loss, output
+
+    def compute_inverse(self, damping):
+        curv = self.avg_hessian.get()
+        grad = self.avg_grad.get()
+            
+        inv_curv = []
+        for curv_group, damping_group in zip(curv, damping):
             inv_curv.append([])
             for curv_p in curv_group:
                 inv_curv[-1].append(1 / (curv_p + damping_group))
-        return ScalarInverseCurvature(inv_curv)
-
-    def multiply(self, damping, grad):
-        result = []
-        for curv_group, damping_group, grad_group in zip(self.curv, damping, grad):
-            result.append([])
-            for curv_p, grad_p in zip(curv_group, grad_group):
-                result[-1].append((curv_p + damping_group) * grad_p)
-        return result
+        return DiagonalInverseCurvature(inv_curv, grad)
 
 
 class BackpackCurvatureEstimator(CurvatureEstimator):
-    def __init__(self, param_groups, bp_extension_cls, use_factors):
-        super().__init__(param_groups)
-        self.moving_average = MovingAverage(use_factors=use_factors)
+    def __init__(self, param_groups, beta1, beta2, bp_extension_cls, use_factors, adam_style=False):
+        super().__init__(param_groups, beta1, beta2)
+        self.avg_hessian = MovingAverage(param_groups, beta=beta2, use_factors=use_factors, adam_style=adam_style)
+        self.avg_grad = MovingAverage(param_groups, beta=beta1, use_factors=False)
         self.bp_extension_cls = bp_extension_cls
 
     def compute_curvature(self, closure, retain_graph=False):
@@ -117,115 +131,125 @@ class BackpackCurvatureEstimator(CurvatureEstimator):
             loss, output = closure()
             loss.backward(retain_graph=retain_graph)
 
-            input_to_moving_average = list(
+            input_to_avg_hessian = list(
                 [
                     list([getattr(p, bp_savefield) for p in group["params"]])
                     for group in self.param_groups
                 ]
             )
+            input_to_avg_grad = list(
+                [
+                    list([p.grad for p in group["params"]])
+                    for group in self.param_groups
+                ]
+            )
 
-            self.moving_average.step(input_to_moving_average)
+            self.avg_hessian.step(input_to_avg_hessian)
+            self.avg_grad.step(input_to_avg_grad)
 
         return loss, output
 
 
 class DiagCurvatureBase(BackpackCurvatureEstimator):
-    def __init__(self, param_groups, bp_extension_cls):
+    def __init__(self, param_groups, beta1, beta2, bp_extension_cls, adam_style=False):
         use_factors = False
-        super().__init__(param_groups, bp_extension_cls, use_factors)
+        super().__init__(param_groups, beta1, beta2, bp_extension_cls, use_factors, adam_style=adam_style)
 
     def compute_inverse(self, damping):
-        curv = self.moving_average.get()
+        curv = self.avg_hessian.get()
+        grad = self.avg_grad.get()
 
         inv_curv = []
         for curv_group, damping_group in zip(curv, damping):
             inv_curv.append([])
             for curv_p in curv_group:
                 inv_curv[-1].append(1 / (curv_p + damping_group))
-        return DiagonalInverseCurvature(inv_curv)
-
-    def multiply(self, damping, grad):
-        curv = self.moving_average.get()
-        result = []
-        for curv_group, damping_group, grad_group in zip(curv, damping, grad):
-            result.append([])
-            for curv_p, grad_p in zip(curv_group, grad_group):
-                result[-1].append((curv_p + damping_group) * grad_p)
-        return result
-
+        return DiagonalInverseCurvature(inv_curv, grad)
 
 class DiagGGNExactCurvature(DiagCurvatureBase):
-    def __init__(self, param_groups):
-        super().__init__(param_groups, DiagGGNExact)
+    def __init__(self, param_groups, beta1, beta2, adam_style=False):
+        super().__init__(param_groups, beta1, beta2, DiagGGNExact, adam_style=False)
 
 
 class DiagGGNMCCurvature(DiagCurvatureBase):
-    def __init__(self, param_groups):
-        super().__init__(param_groups, DiagGGNMC)
+    def __init__(self, param_groups, beta1, beta2, adam_style=False):
+        super().__init__(param_groups, beta1, beta2, DiagGGNMC, adam_style=False)
 
-class HesScaleCurvatureBase(BackpackCurvatureEstimator):
-    def __init__(self, param_groups, bp_extension_cls, max_or_abs='abs'):
-        use_factors = False
-        self.max_or_abs = max_or_abs
-        super().__init__(param_groups, bp_extension_cls, use_factors)
+class HesScaleCurvatureBase(DiagCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2, bp_extension_cls, style='max'):
+        self.style = style        
+        self.adam_style = True if style == 'adam' else False
+        super().__init__(param_groups, beta1, beta2, bp_extension_cls, adam_style=self.adam_style)
 
-    def compute_inverse(self, damping):
-        curv = self.moving_average.get()
+    def compute_curvature(self, closure, retain_graph=False):
+        """Data structure for moving average is supported by backpack."""
+        bp_extension = self.bp_extension_cls()
+        bp_savefield = bp_extension.savefield
 
-        inv_curv = []
-        for curv_group, damping_group in zip(curv, damping):
-            inv_curv.append([])
-            for curv_p in curv_group:
-                if self.max_or_abs == 'abs':
-                    curv_p.abs_()
-                elif self.max_or_abs == 'max':
-                    torch_max(curv_p, tensor([0.0], device=curv_p.device), out=curv_p)
+        with backpack(bp_extension):
+            loss, output = closure()
+            loss.backward(retain_graph=retain_graph)
+
+            input_to_avg_grad = list(
+                [
+                    list([p.grad for p in group["params"]])
+                    for group in self.param_groups
+                ]
+            )
+            self.avg_grad.step(input_to_avg_grad)
+            if self.style == "max":
+                input_to_avg_hessian = list(
+                    [
+                        list([torch_max(getattr(p, bp_savefield), tensor([0.0], device=getattr(p, bp_savefield).device)) for p in group["params"]])
+                        for group in self.param_groups
+                    ]
+                )
+            elif self.adam_style:
+                input_to_avg_hessian = list(
+                    [
+                        list([getattr(p, bp_savefield) ** 2 for p in group["params"]])
+                        for group in self.param_groups
+                    ]
+                )
+            else:
+                input_to_avg_hessian = list(
+                    [
+                        list([getattr(p, bp_savefield) for p in group["params"]])
+                        for group in self.param_groups
+                    ]
+                )
+            if self.style == "no_h_update":
+                if self.avg_hessian.step_counter == 0:
+                    old_estimate = self.avg_hessian.initialize(input_to_avg_hessian)
                 else:
-                    raise "No valid HesScale Operation!"
-                inv_curv[-1].append(1 / (curv_p + damping_group))
-        return DiagonalInverseCurvature(inv_curv)
+                    old_estimate = self.avg_hessian.get()
+                    
+                self.avg_hessian.step(input_to_avg_hessian)
+                self.avg_hessian.zero_decay(old_estimate, input_to_avg_hessian)
+            else:
+                self.avg_hessian.step(input_to_avg_hessian)
 
-    def multiply(self, damping, grad):
-        curv = self.moving_average.get()
-        result = []
-        for curv_group, damping_group, grad_group in zip(curv, damping, grad):
-            result.append([])
-            for curv_p, grad_p in zip(curv_group, grad_group):
-                result[-1].append((curv_p + damping_group) * grad_p)
-        return result
-
-class HesScaleCurvatureAbs(HesScaleCurvatureBase):
-    def __init__(self, param_groups):
-        super().__init__(param_groups, HesScale, max_or_abs='abs')
-
+        return loss, output, input_to_avg_hessian
 class HesScaleCurvatureMax(HesScaleCurvatureBase):
-    def __init__(self, param_groups):
-        super().__init__(param_groups, HesScale, max_or_abs='max')
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='max')
+
+class HesScaleCurvatureAdamStyle(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='adam')
+        
+class HesScaleCurvatureZeroHessianUpdate(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='no_h_update')
         
 class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
-    def __init__(self, param_groups, bp_extension_cls):
+    def __init__(self, param_groups, beta1, beta2, bp_extension_cls):
         use_factors = True
-        super().__init__(param_groups, bp_extension_cls, use_factors)
-
-    def multiply(self, damping, grad):
-        curv = self.moving_average.get()
-        result = []
-        for curv_group, damping_group, grad_group in zip(curv, damping, grad):
-            result.append([])
-            for curv_p, grad_p in zip(curv_group, grad_group):
-                damp_adapted_grad = damping_group * grad_p
-
-                # TODO: avoid view (currently requires flattened vectors)
-                grad_p_flat = grad_p.view(-1)
-                curv_adapted_grad = multiply_vec_with_kron_facs(
-                    curv_p, grad_p_flat)
-                curv_adapted_grad = curv_adapted_grad.view_as(grad_p)
-
-                result[-1].append(damp_adapted_grad + curv_adapted_grad)
-        return result
+        super().__init__(param_groups, beta1, beta2, bp_extension_cls, use_factors)
 
     def compute_inverse(self, damping):
-        curv = self.moving_average.get()
+        curv = self.avg_hessian.get()
+        grad = self.avg_grad.get()
 
         inv_curv = []
         for curv_group, damping_group in zip(curv, damping):
@@ -261,7 +285,7 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
                         "Got {} Kronecker factors, can only handle <= 2".
                         format(len(curv_p)))
 
-        return KroneckerInverseCurvature(inv_curv)
+        return KroneckerInverseCurvature(inv_curv, grad)
 
     def __compute_tikhonov_factor(self, kfac1, kfac2):
         """Scalar pi from trace norm for factored Tikhonov regularization.
@@ -296,20 +320,7 @@ class KroneckerFactoredCurvature(BackpackCurvatureEstimator):
 
 class KFACCurvature(KroneckerFactoredCurvature):
     """Kronecker factorization by Martens."""
-    def __init__(self, param_groups):
+    def __init__(self, param_groups, beta1, beta2):
         bp_extension_cls = KFAC
-        super().__init__(param_groups, bp_extension_cls)
+        super().__init__(param_groups, beta1, beta2, bp_extension_cls)
 
-
-class KFLRCurvature(KroneckerFactoredCurvature):
-    """Kronecker factored low-rank approximation by Botev."""
-    def __init__(self, param_groups):
-        bp_extension_cls = KFLR
-        super().__init__(param_groups, bp_extension_cls)
-
-
-class KFRACurvature(KroneckerFactoredCurvature):
-    """Kronecker factored recursive approximation by Botev."""
-    def __init__(self, param_groups):
-        bp_extension_cls = KFRA
-        super().__init__(param_groups, bp_extension_cls)

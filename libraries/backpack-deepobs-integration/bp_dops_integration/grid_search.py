@@ -10,6 +10,7 @@ Notes:
 import os
 import pprint
 from math import inf as INFINITY
+from itertools import product
 
 from deepobs.tuner import GridSearch
 from deepobs import config as dobs_config
@@ -17,6 +18,69 @@ from deepobs import config as dobs_config
 from .runners import BPOptimRunner
 
 
+class GridSearchLocal(GridSearch):
+    """
+    A basic Grid Search tuner.
+    """
+    def __init__(self, optimizer_class, hyperparam_names, grid, ressources, runner):
+        """
+        Args:
+            grid (dict): Holds the discrete values for each hyperparameter as lists.
+        """
+        super(GridSearch, self).__init__(optimizer_class, hyperparam_names, ressources, runner)
+        self.__check_if_grid_is_valid(grid, ressources)
+        self._grid = grid
+        self._search_name = 'grid_search'
+
+    @staticmethod
+    def __check_if_grid_is_valid(grid, ressources):
+        grid_size = len(list(product(*[values for values in grid.values()])))
+        if grid_size > ressources:
+            raise RuntimeError('Grid is too large for the available number of iterations.')
+
+    def _sample(self):
+        all_values = []
+        all_keys = []
+        for key, values in self._grid.items():
+            all_values.append(values)
+            all_keys.append(key)
+
+        samples = []
+        for sample in product(*all_values):
+            sample_dict = {}
+            for index, value in enumerate(sample):
+                sample_dict[all_keys[index]] = value
+            samples.append(sample_dict)
+
+        return samples
+
+    def generate_commands_script(self, testproblem, run_script, output_dir='./results', random_seed=42,
+                                 generation_dir = './command_scripts', **kwargs):
+        """
+        Args:
+            testproblem (str): Testproblem for which to generate commands.
+            run_script (str): Name the run script that is used from the command line.
+            output_dir (str): The output path where the execution results are written to.
+            random_seed (int): The random seed for the tuning.
+            generation_dir (str): The path to the directory where the generated scripts are written to.
+
+        Returns:
+            str: The relative file path to the generated commands script.
+
+        """
+
+        os.makedirs(generation_dir, exist_ok=True)
+        file_path = os.path.join(generation_dir, 'jobs_' + self._optimizer_name + '_' + self._search_name + '_' + testproblem + '.txt')
+        file = open(file_path, 'w')
+        kwargs_string = self._generate_kwargs_format_for_command_line(**kwargs)
+        self._set_seed(random_seed)
+        params = self._sample()
+        for sample in params:
+            sample_string = self._generate_hyperparams_format_for_command_line(sample)
+            file.write('python3 ' + run_script + ' ' + testproblem + ' ' + sample_string + ' --output_dir ' + output_dir + ' ' + kwargs_string + '\n')
+        file.close()
+        return file_path
+    
 class BPGridSearchBase():
     """Basic functionality to create runscripts for grid searches.
 
@@ -95,7 +159,7 @@ class BPGridSearchBase():
         return self._get_optim_name()
 
     def create_deepobs_tuner(self, grid):
-        return GridSearch(self.optim_cls,
+        return GridSearchLocal(self.optim_cls,
                           self.get_hyperparams(),
                           grid,
                           ressources=INFINITY,
@@ -227,7 +291,9 @@ class BPGridSearchBase():
         return len(key_list) == len(key_set)
 
     def _hyperparams_as_str(self):
-        hyperparams_str = pprint.pformat(self.get_hyperparams())
+        hyper_params = self.get_hyperparams()
+        del hyper_params["random_seed"]
+        hyperparams_str = pprint.pformat(hyper_params)
         hyperparams_str = self._fix_data_type_formatting(hyperparams_str)
         return hyperparams_str
 
@@ -301,6 +367,7 @@ class BPGridSearch(BPGridSearchBase):
     def get_grid_dim(self):
         grid = self._get_grid()
         dim = 1
+        del grid["random_seed"]
         for _, values in grid.items():
             dim *= len(values)
         return dim

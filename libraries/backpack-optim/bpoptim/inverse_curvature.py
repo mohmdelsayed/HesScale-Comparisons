@@ -8,10 +8,11 @@ Only provides one method, the multiplication with a vector.
 from bpoptim.utils import multiply_vec_with_kron_facs
 
 class InverseCurvature:
-    def __init__(self, inv_curv):
+    def __init__(self, inv_curv, grad):
         self.inv_curv = inv_curv
+        self.grad = grad
 
-    def multiply(self, grad):
+    def multiply(self, step_sizes):
         """
         `vec` is expected to be in [group[parameter]] format;
         ```
@@ -25,8 +26,8 @@ class InverseCurvature:
         ```
         """
         results = []
-        for inv_curv_group, grad_group in zip(self.inv_curv, grad):
-            results.append(self._multiply_group(inv_curv_group, grad_group))
+        for inv_curv_group, grad_group, step_size_group in zip(self.inv_curv, self.grad, step_sizes):
+            results.append(self._multiply_group(inv_curv_group, grad_group, step_size_group))
         return results
 
     def _multiply_group(self, inv_curv_group, grad_group):
@@ -34,7 +35,7 @@ class InverseCurvature:
 
 
 class DiagonalInverseCurvature(InverseCurvature):
-    def __init__(self, inv_curv):
+    def __init__(self, inv_curv, grad):
         """
         `inv_curv` is expected to be in [group[parameter]] format;
         ```
@@ -47,34 +48,17 @@ class DiagonalInverseCurvature(InverseCurvature):
         ]
         ```
         """
-        super().__init__(inv_curv)
+        super().__init__(inv_curv, grad)
 
-    def _multiply_group(self, inv_curv_group, grad_group):
+    def _multiply_group(self, inv_curv_group, grad_group, step_size_group):
         group_results = []
-        for inv_curv_p, grad_p in zip(inv_curv_group, grad_group):
-            group_results.append(inv_curv_p * grad_p)
+        for inv_curv_p, grad_p, step_size_p in zip(inv_curv_group, grad_group, step_size_group):
+            group_results.append(inv_curv_p * grad_p * step_size_p)
         return group_results
 
 
-class ScalarInverseCurvature(DiagonalInverseCurvature):
-    def __init__(self, inv_curv):
-        """
-        `inv_curv` is expected to be in [group[parameter]] format;
-        ```
-        inv_curv = [       # for each group
-            [              # for each parameter in the group
-                scalar,    # the value for that parameter
-                ...
-            ],
-            ...
-        ]
-        ```
-        """
-        super().__init__(inv_curv)
-
-
 class KroneckerInverseCurvature(InverseCurvature):
-    def __init__(self, inv_curv):
+    def __init__(self, inv_curv, grad):
         """
         `inv_curv` is expected to be in [group[parameter[kroneckers]]] format;
         ```
@@ -90,13 +74,13 @@ class KroneckerInverseCurvature(InverseCurvature):
         ]
         ```
         """
-        super().__init__(inv_curv)
+        super().__init__(inv_curv, grad)
 
-    def _multiply_group(self, inv_curv_group, grad_group):
+    def _multiply_group(self, inv_curv_group, grad_group, step_size_group):
         group_results = []
-        for inv_curv_p, grad_p in zip(inv_curv_group, grad_group):
+        for inv_curv_p, grad_p, step_size_p in zip(inv_curv_group, grad_group, step_size_group):
             # TODO: avoid view (currently requires flattened vectors)
-            grad_p_flat = grad_p.view(-1)
+            grad_p_flat = (grad_p * step_size_p).view(-1)
             curv_adapted_grad = multiply_vec_with_kron_facs(
                 inv_curv_p, grad_p_flat)
             curv_adapted_grad = curv_adapted_grad.view_as(grad_p)
