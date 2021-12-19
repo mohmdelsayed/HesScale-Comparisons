@@ -367,6 +367,7 @@ class BPGridSearch(BPGridSearchBase):
     def get_grid_dim(self):
         grid = self._get_grid()
         dim = 1
+        del grid["random_seed"]
         for _, values in grid.items():
             dim *= len(values)
         return dim
