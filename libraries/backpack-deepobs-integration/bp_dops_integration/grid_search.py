@@ -223,9 +223,12 @@ class BPGridSearchBase():
         result += "\n# arguments from command line\n"
         result += self._python_script_command_before_training()
 
-        result += "runner.run()\n"
+        result += "try:"
+        result += "\n\trunner.run()"
         # possibility to log successful run somewhere
-        result += self._python_script_command_after_training()
+        result += self._python_script_command_after_training('\t', "finished")
+        result += "except:"
+        result += self._python_script_command_after_training('\t', "failed")
 
         return result
 
@@ -237,7 +240,7 @@ class BPGridSearchBase():
         """
         return ""
 
-    def _python_script_command_after_training(self):
+    def _python_script_command_after_training(self, c, filename):
         """Command that is run after training loop.
 
         Can be used to log somewhere that the run was successful.
@@ -372,11 +375,11 @@ class BPGridSearch(BPGridSearchBase):
             dim *= len(values)
         return dim
 
-    def _python_script_command_after_training(self):
-        result = "\n# Write command to 'finished.txt'\n"
-        result += "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
-        result += "with open('finished.txt', 'a') as f:\n"
-        result += "\tf.write(command)\n"
+    def _python_script_command_after_training(self, c, filename):
+        result = "\n" + c + "# Write command to 'filename.txt'\n"
+        result += c+ "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
+        result += c +"with open(" + "'" + filename + ".txt', 'a') as f:\n"
+        result += c+"\tf.write(command)\n"
         return result
 
     def _get_import_statement(self):
