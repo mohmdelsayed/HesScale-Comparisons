@@ -164,7 +164,7 @@ def summarize_grid_search_progress():
 
 
 if __name__ == "__main__":
-    n_seeds = len(TuningBaseDamping.LEARNING_RATES)
+    n_seeds = TuningBaseDamping.n_seeds
     check_grid_search_manually()
     print_dashed_line()
     single_seed = check_grid_search_each_run_has_n_seed(n_seeds)
