@@ -1,21 +1,15 @@
-from deepobs.analyzer.analyze import plot_optimizer_performance, plot_hyperparameter_sensitivity
-import matplotlib.pyplot as plt
 import os
-import warnings
-warnings.filterwarnings("ignore")
-from matplotlib.pyplot import figure
+from bp_dops_integration.plotting import plot_optimizer_performance, plot_hyperparameter_sensitivity
+import matplotlib.pyplot as plt
 
-path = '../grid_search/mnist_mlp_tanh/'
+path = '../grid_search/mnist_mlp_relu/'
 my_list = os.listdir(path)
-fig, ax = plt.subplots(4, 1, sharex="col")
-fig.set_size_inches(20, 16)
 
-[plot_optimizer_performance(path+algo, fig=fig, ax=ax, reference_path=None, show=False, metric='test_accuracies', mode='final') for algo in my_list]
-fig.savefig('performance.png', dpi=100)
+fig, ax = plt.subplots(4, 1, sharex="col"); fig.set_size_inches(20, 16); ax[2].set_ylim(0.8, 1.0); ax[3].set_ylim(0.8, 1.0)
+[plot_optimizer_performance(path+algo, fig=fig, ax=ax, reference_path=None, show=False, metric='valid_losses', mode='area') for algo in my_list]
+fig.savefig('performance.png', dpi=300)
 
-
-# fig, ax = plt.subplots(1, 1, sharex="col")   
-# fig.set_size_inches(20, 16)
-# [plot_hyperparameter_sensitivity(path+algo, hyperparam='lr', xscale='log', plot_std=True, metric="valid_accuracies", show=False, fig=fig, ax=ax) for algo in my_list]
-# fig.savefig('sensitivity.png', dpi=100)
+# fig, ax = plt.subplots(1, 1, sharex="col"); fig.set_size_inches(20, 16); ax.set_ylim(0.7, 1.0)
+# [plot_hyperparameter_sensitivity(path+algo, hyperparam="beta1", xscale='log', plot_std=False, metric="valid_accuracies", show=False, fig=fig, ax=ax) for algo in my_list]
+# fig.savefig('sensitivity.png', dpi=300)
 
