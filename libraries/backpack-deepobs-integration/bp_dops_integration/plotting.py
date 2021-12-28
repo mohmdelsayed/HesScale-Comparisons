@@ -136,11 +136,9 @@ def plot_optimizer_performance(
 
 def _plot_hyperparameter_sensitivity(
     optimizer_path,
-    hyperparam,
     ax,
     mode="final",
     metric="valid_accuracies",
-    plot_std=False,
 ):
 
     metric = _determine_available_metric(optimizer_path, metric)
@@ -151,42 +149,38 @@ def _plot_hyperparameter_sensitivity(
     )
 
     # create array for plotting
-    param_values = [d["params"][hyperparam] for d in tuning_summary]
+    param_values = [d["params"] for d in tuning_summary]
     target_means = [d[metric + "_mean"] for d in tuning_summary]
-    target_stds = [d[metric + "_mean"] for d in tuning_summary]
+    
+    plot_list = {}
+    for params, means in zip(param_values, target_means):
+        try:
+            plot_list[(params["beta1"], params["beta2"])].append({params["lr"]: means})
+        except:
+            plot_list[(params["beta1"], params["beta2"])] = [{params["lr"]: means}]
+        
+    for i, setting in enumerate(plot_list):
+        internal_dict = plot_list[setting]
+        x, y = [], []
+        for element in internal_dict:
+            for k,v in element.items():
+                x.append(k); y.append(v)
 
-    param_values, target_means, target_stds = (
-        list(t)
-        for t in zip(*sorted(zip(param_values, target_means, target_stds)))
-    )
+        x = np.asarray(x); y = np.asarray(y); sorted_indx = np.argsort(x)
+        
+        ax[i].plot(x[sorted_indx], y[sorted_indx], linewidth=1, label=optimizer_name)
+        ax[i].set_ylabel(str(setting), fontsize=14)
+        ax[i].tick_params(labelsize=12)
+        ax[i].set_xscale('log')
 
-    param_values = np.array(param_values)
-    target_means = np.array(target_means)
-    ax.plot(param_values, target_means, linewidth=3, label=optimizer_name)
-    if plot_std:
-        ranks = create_setting_analyzer_ranking(optimizer_path, mode, metric)
-        for rank in ranks:
-            values = rank.get_all_final_values(metric)
-            param_value = rank.aggregate["optimizer_hyperparams"][hyperparam]
-            for value in values:
-                ax.scatter(param_value, value, marker="x", color="b")
-            ax.plot(
-                (param_value, param_value),
-                (min(values), max(values)),
-                color="grey",
-                linestyle="--",
-            )
-    ax.set_title(testproblem, fontsize=20)
+    ax[0].set_title(testproblem, fontsize=20)
     return ax
 
 
 def plot_hyperparameter_sensitivity(
     path,
-    hyperparam,
     mode="final",
     metric="valid_accuracies",
-    xscale="linear",
-    plot_std=True,
     reference_path=None,
     show=True,
     fig=None,
@@ -214,7 +208,7 @@ def plot_hyperparameter_sensitivity(
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)
         ax = _plot_hyperparameter_sensitivity(
-            optimizer_path, hyperparam, ax, mode, metric, plot_std
+            optimizer_path, ax, mode, metric
         )
     if reference_path is not None:
         pathes = _preprocess_path(reference_path)
@@ -223,14 +217,10 @@ def plot_hyperparameter_sensitivity(
                 reference_optimizer_path, metric
             )
             ax = _plot_hyperparameter_sensitivity(
-                reference_optimizer_path, hyperparam, ax, mode, metric, plot_std
+                reference_optimizer_path, ax, mode, metric
             )
 
-    plt.xscale(xscale)
-    plt.xlabel(hyperparam, fontsize=16)
-    plt.ylabel(metric, fontsize=16)
-    ax.tick_params(labelsize=14)
-    ax.legend()
+    ax[0].legend(prop={'size': 8})
     if show:
         plt.show()
     return fig, ax
