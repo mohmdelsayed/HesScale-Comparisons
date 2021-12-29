@@ -168,12 +168,21 @@ def _plot_hyperparameter_sensitivity(
 
         x = np.asarray(x); y = np.asarray(y); sorted_indx = np.argsort(x)
         
-        ax[i].plot(x[sorted_indx], y[sorted_indx], linewidth=1, label=optimizer_name)
-        ax[i].set_ylabel(str(setting), fontsize=14)
-        ax[i].tick_params(labelsize=12)
-        ax[i].set_xscale('log')
+        idx1 = i // 3; idx2 = i % 3
+        
+        if "SGD" in optimizer_name:
+            idx1 = idx2 = 2
 
-    ax[0].set_title(testproblem, fontsize=20)
+        ax[idx1][idx2].plot(x[sorted_indx], y[sorted_indx], linewidth=1, label=optimizer_name)
+        ax[idx1][idx2].set_ylabel(str(setting), fontsize=14)
+        ax[idx1][idx2].tick_params(labelsize=12)
+        ax[idx1][idx2].set_xscale('log')
+        if "SGD" in optimizer_name:
+            ax[2][2].legend(prop={'size': 8})
+            
+        ax[0][0].legend(prop={'size': 8})
+
+    ax[0][0].set_title(testproblem, fontsize=20)
     return ax
 
 
@@ -220,7 +229,6 @@ def plot_hyperparameter_sensitivity(
                 reference_optimizer_path, ax, mode, metric
             )
 
-    ax[0].legend(prop={'size': 8})
     if show:
         plt.show()
     return fig, ax
