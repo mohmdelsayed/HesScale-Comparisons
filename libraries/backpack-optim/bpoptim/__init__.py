@@ -29,6 +29,11 @@ def HesScaleOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
         params, HesScaleCurvatureAdamStyle, lr=lr, damping=damping, **kwargs
     )
 
+def OBDAdamStyle(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureAdamStyle, lr=lr, damping=damping, **kwargs
+    )
+
 def HesScaleOptimizerZeroHessianUpdate(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureZeroHessianUpdate, lr=lr, damping=damping, **kwargs

@@ -21,7 +21,9 @@ PROBLEMS = [
     'mnist_2c2d_relu',
     'mnist_mlp_tanh',
     'mnist_mlp_relu',
+    'mnist_mlp_tanh_obd',
     'mnist_logreg_custom',
+    'mnist_logreg_custom_obd',
 ]
 
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
@@ -34,8 +36,11 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "mnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
     "mnist_2c2d_relu": {"batch_size": 128, "num_epochs": 100},
     "mnist_mlp_tanh": {"batch_size": 128, "num_epochs": 100},
+    "mnist_mlp_tanh_obd": {"batch_size": 128, "num_epochs": 100},
     "mnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
+    "mnist_mlp_relu_obd": {"batch_size": 128, "num_epochs": 100},
     "mnist_logreg_custom": {"batch_size": 128, "num_epochs": 50},
+    "mnist_logreg_custom_obd": {"batch_size": 128, "num_epochs": 50},
     "fmnist_mlp_tanh": {"batch_size": 128, "num_epochs": 100},
     "fmnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
     "fmnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
@@ -57,18 +62,19 @@ class GridSearchFactory():
     HesScaleNoHessianUpdate = "HesScaleNoHessianUpdate"
     HesScaleNoGradUpdateMax = "HesScaleNoGradUpdateMax"
     HesScaleNoGradUpdateNoHessianUpdate = "HesScaleNoGradUpdateNoHessianUpdate"
+    OBD = "OBD"
 
     CURVATURES = [
         Adam,
         Adam2,
         SGD,
         SGD2,
-        
         HesScaleMax,
         HesScaleAdamStyle,
         HesScaleNoHessianUpdate,
         HesScaleNoGradUpdateMax,
         HesScaleNoGradUpdateNoHessianUpdate,
+        OBD,
         
         DiagGGNMC,
         DiagGGNExact,
@@ -91,6 +97,7 @@ class GridSearchFactory():
         HesScaleNoHessianUpdate: NoTuning,
         HesScaleNoGradUpdateMax: NoTuning,
         HesScaleNoGradUpdateNoHessianUpdate: NoTuning,
+        OBD: NoTuning,
     }
 
     CONSTANT = "const"
@@ -120,6 +127,7 @@ class GridSearchFactory():
 
         (KFAC, CONSTANT): bpoptim.KFACDefaultOptimizer,
         (AdaHessian, CONSTANT): bpoptim.AdaHessDefaultOptimizer,
+        (OBD, CONSTANT): bpoptim.OBDAdamStyle,
     }
 
     def make_grid_search(self,
