@@ -140,6 +140,9 @@ def _exclude(damping, problem, curvature):
     def is_kflr(curvature):
         return curvature == GridSearchFactory.KFLR
 
+    def is_obd(curvature):
+        return curvature == GridSearchFactory.OBD
+
     def is_fmnist_2c2d(problem):
         return problem == "fmnist_2c2d"
 
@@ -148,6 +151,9 @@ def _exclude(damping, problem, curvature):
 
     def is_cifar100_allcnnc(problem):
         return problem == "cifar100_allcnnc"
+
+    def is_obd_problem(problem):
+        return "obd" in problem
 
     def is_fancy(damping):
         return damping == GridSearchFactory.FANCY
@@ -176,11 +182,17 @@ def _exclude(damping, problem, curvature):
         cifar100 = is_cifar100_allcnnc(problem)
         return kflr and cifar100
 
+    def exclude_OBD_for_CE_problems(damping, problem, curvature):
+        obd = is_obd(curvature)
+        obd_problem = is_obd_problem(problem)
+        return (not obd) and obd_problem
+
     # add more criteria to exclude runs
     criteria = [
         # exclude_zero,
         # exclude_KFRA_for_fmnist_cifar10_cifar100,
-        exclude_DiagGGNExact_for_cifar100,
+        # exclude_DiagGGNExact_for_cifar100,
+        exclude_OBD_for_CE_problems,
         # exclude_KFLR_for_cifar100,
     ]
 

@@ -31,6 +31,17 @@ class net_mnist_logreg(nn.Sequential):
         nn.init.constant_(self.dense.bias, 0.0)
         nn.init.constant_(self.dense.weight, 0.0)
 
+class net_mnist_logreg_obd(nn.Sequential):
+    def __init__(self, num_outputs):
+        super(net_mnist_logreg_obd, self).__init__()
+
+        self.add_module("flatten", flatten())
+        self.add_module("dense", nn.Linear(in_features=784, out_features=num_outputs))
+        self.add_module("logsoftmax", nn.LogSoftmax())
+
+        # init
+        nn.init.constant_(self.dense.bias, 0.0)
+        nn.init.constant_(self.dense.weight, 0.0)
 
 class net_cifar10_3c3d(nn.Sequential):
     """Basic conv net for cifar10/100. The network consists of
@@ -267,6 +278,36 @@ class net_mlp(nn.Sequential):
         self.add_module("dense3", nn.Linear(500, 100))
         self.add_module("act3", activation())
         self.add_module("dense4", nn.Linear(100, num_outputs))
+
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                module.weight.data = _truncated_normal_init(
+                    module.weight.data, mean=0, stddev=3e-2
+                )
+
+class net_mlp_obd(nn.Sequential):
+    """A basic MLP architecture for Negative Log Likelihood loss. The network is build as follows:
+
+    - Four fully-connected layers with ``1000``, ``500``,``100`` and ``num_outputs``
+      units per layer, where ``num_outputs`` is the number of ouputs (i.e. class labels).
+    - The first three layers use Tanh activation, and the last one a softmax
+      activation.
+    - The biases are initialized to ``0.0`` and the weight matrices with
+      truncated normal (standard deviation of ``3e-2``)"""
+
+    def __init__(self, num_outputs, use_tanh=True):
+        super(net_mlp_obd, self).__init__()
+        activation = nn.Tanh if use_tanh else nn.ReLU
+        self.add_module("flatten", flatten())
+        self.add_module("dense1", nn.Linear(784, 1000))
+        self.add_module("act1", activation())
+        self.add_module("dense2", nn.Linear(1000, 500))
+        self.add_module("act2", activation())
+        self.add_module("dense3", nn.Linear(500, 100))
+        self.add_module("act3", activation())
+        self.add_module("dense4", nn.Linear(100, num_outputs))
+        self.add_module("logsoftmax", nn.LogSoftmax())
 
         for module in self.modules():
             if isinstance(module, nn.Linear):
