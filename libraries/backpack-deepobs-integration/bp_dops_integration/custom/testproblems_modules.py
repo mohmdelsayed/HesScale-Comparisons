@@ -34,8 +34,8 @@ class net_mnist_logreg(nn.Sequential):
 
 class net_cifar10_3c3d(nn.Sequential):
     """Basic conv net for cifar10/100. The network consists of
-      - thre conv layers with ReLUs, each followed by max-pooling
-      - two fully-connected layers with ``512`` and ``256`` units and ReLU activation
+      - thre conv layers with ELUs, each followed by max-pooling
+      - two fully-connected layers with ``512`` and ``256`` units and ELU activation
       - output layer with softmax
     The weight matrices are initialized using Xavier initialization and the biases
     are initialized to ``0.0``."""
@@ -44,7 +44,7 @@ class net_cifar10_3c3d(nn.Sequential):
         """Args:
         num_outputs (int): The numer of outputs (i.e. target classes)."""
         super(net_cifar10_3c3d, self).__init__()
-        activation = nn.Tanh if use_tanh else nn.ReLU
+        activation = nn.Tanh if use_tanh else nn.ELU
 
         self.add_module(
             "conv1", tfconv2d(in_channels=3, out_channels=64, kernel_size=5)
@@ -96,8 +96,8 @@ class net_mnist_2c2d(nn.Sequential):
     """  Basic conv net for (Fashion-)MNIST. The network has been adapted from the `TensorFlow tutorial\
   <https://www.tensorflow.org/tutorials/estimators/cnn>`_ and consists of
 
-    - two conv layers with ReLUs, each followed by max-pooling
-    - one fully-connected layers with ReLUs
+    - two conv layers with ELUs, each followed by max-pooling
+    - one fully-connected layers with ELUs
     - output layer with softmax
 
   The weight matrices are initialized with truncated normal (standard deviation
@@ -108,7 +108,7 @@ class net_mnist_2c2d(nn.Sequential):
         num_outputs (int): The numer of outputs (i.e. target classes)."""
 
         super(net_mnist_2c2d, self).__init__()
-        activation = nn.Tanh if use_tanh else nn.ReLU
+        activation = nn.Tanh if use_tanh else nn.ELU
 
         self.add_module(
             "conv1",
@@ -158,7 +158,7 @@ class net_cifar100_allcnnc(nn.Sequential):
     def __init__(self, use_tanh=True):
         super(net_cifar100_allcnnc, self).__init__()
 
-        activation = nn.Tanh if use_tanh else nn.ReLU
+        activation = nn.Tanh if use_tanh else nn.ELU
 
         self.add_module("dropout1", nn.Dropout(p=0.2))
 
@@ -258,7 +258,7 @@ class net_mlp(nn.Sequential):
 
     def __init__(self, num_outputs, use_tanh=True):
         super(net_mlp, self).__init__()
-        activation = nn.Tanh if use_tanh else nn.ReLU
+        activation = nn.Tanh if use_tanh else nn.ELU
         self.add_module("flatten", flatten())
         self.add_module("dense1", nn.Linear(784, 1000))
         self.add_module("act1", activation())
