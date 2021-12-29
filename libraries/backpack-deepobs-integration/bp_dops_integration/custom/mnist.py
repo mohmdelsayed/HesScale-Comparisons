@@ -36,7 +36,7 @@ class mnist(DataSet):
     def _make_train_and_valid_dataloader(self):
         transform=transforms.Compose([
             transforms.ToTensor(), # first, convert image to PyTorch tensor
-            transforms.Normalize((0.1307,), (0.3081,)) # normalize inputs
+            # transforms.Normalize((0.1307,), (0.3081,)) # normalize inputs
         ])
         train_dataset = datasets.MNIST(root=DATA_DIR, train=True, download=True, transform=transform)
         valid_dataset = datasets.MNIST(root=DATA_DIR, train=True, download=True, transform=transform)
