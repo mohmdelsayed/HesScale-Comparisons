@@ -66,19 +66,19 @@ class GridSearchFactory():
 
     CURVATURES = [
         Adam,
-        Adam2,
+        # Adam2,
         SGD,
-        SGD2,
+        # SGD2,
         HesScaleMax,
         HesScaleAdamStyle,
         HesScaleNoHessianUpdate,
         HesScaleNoGradUpdateMax,
         HesScaleNoGradUpdateNoHessianUpdate,
-        OBD,
+        # OBD,
         
         DiagGGNMC,
         DiagGGNExact,
-        KFAC,
+        # KFAC,
         AdaHessian,
     ]
 
