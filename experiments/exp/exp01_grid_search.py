@@ -2,6 +2,7 @@
 
 from bp_dops_integration.experiments import GridSearchFactory
 from utils import DEFAULT_TEST_PROBLEMS_SETTINGS, allowed_combinations
+from control import make_filter_func
 
 
 def create_runscripts(filter_func=None):
@@ -25,8 +26,5 @@ def create_grid_search(filter_func=None):
 
 
 if __name__ == "__main__":
-    from control import make_filter_func
-
     filter_func = make_filter_func()
-
     create_runscripts(filter_func=filter_func)
