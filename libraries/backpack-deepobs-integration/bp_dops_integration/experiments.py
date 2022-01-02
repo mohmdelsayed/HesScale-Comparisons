@@ -135,16 +135,18 @@ class GridSearchFactory():
                          damping_str,
                          deepobs_problem,
                          output_dir="../grid_search",
-                         generation_dir="../grid_search_command_scripts"):
+                         generation_dir="../grid_search_command_scripts",
+                         copy_files=False):
         optim_cls = self._get_damped_optimizer(curv_str, damping_str)
         tune_curv, tune_damping = self.get_tunings(curv_str, damping_str)
-        if not os.path.exists(generation_dir):
-            os.mkdir(generation_dir)
-        srcs = "../../libraries/backpack-deepobs-integration/bp_dops_integration/custom/"
-        files = os.listdir(srcs)
-        for f in files:
-            if os.path.isfile(srcs+f):
-                shutil.copy(srcs+f, generation_dir)
+        if copy_files:
+            if not os.path.exists(generation_dir):
+                os.mkdir(generation_dir)
+            srcs = "../../libraries/backpack-deepobs-integration/bp_dops_integration/custom/"
+            files = os.listdir(srcs)
+            for f in files:
+                if os.path.isfile(srcs+f):
+                    shutil.copy(srcs+f, generation_dir)
         return BPGridSearch(deepobs_problem,
                             optim_cls,
                             tune_curv,

@@ -150,29 +150,9 @@ def get_results_path():
     results_path = first_grid_search.get_output_dir()
     return results_path
 
-
-def summarize_grid_search_progress():
-    headers = ["Problem", "Found all", "Grid complete"]
-    result = []
-    for problem in PROBLEMS:
-        filter_func = filter_problem(problem)
-        complete = check_complete(get_results_path(), filter_func)
-        grid_complete = check_grid_search_complete(filter_func)
-        result.append([problem, complete, grid_complete])
-    result = pandas.DataFrame(result, columns=headers)
-    return result
-
-
 if __name__ == "__main__":
     n_seeds = TuningBaseDamping.n_seeds
     check_grid_search_manually()
     print_dashed_line()
     single_seed = check_grid_search_each_run_has_n_seed(n_seeds)
-    print_dashed_line()
-    summary = summarize_grid_search_progress()
-
-    print_dashed_line()
-    print("GRID SEARCH TEST SUMMARY\n")
-    print(summary.to_string(index=False))
-    print("\nFound all runs evaluated on {} seed(s): {}".format(n_seeds, single_seed))
     print_dashed_line()
