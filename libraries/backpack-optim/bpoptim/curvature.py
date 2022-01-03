@@ -11,6 +11,7 @@ The role of those classes is to
 import math
 from torch import einsum, symeig, tensor
 from torch import max as torch_max
+from torch import abs as torch_abs
 from backpack import backpack
 from backpack.extensions import DiagGGNExact, DiagGGNMC, KFAC, KFLR, KFRA
 
@@ -204,6 +205,20 @@ class HesScaleCurvatureBase(DiagCurvatureBase):
                         for group in self.param_groups
                     ]
                 )
+            elif self.style == "abs":
+                input_to_avg_hessian = list(
+                    [
+                        list([torch_abs(getattr(p, bp_savefield)) for p in group["params"]])
+                        for group in self.param_groups
+                    ]
+                )
+            elif self.style == "raw":
+                input_to_avg_hessian = list(
+                    [
+                        list([getattr(p, bp_savefield) for p in group["params"]])
+                        for group in self.param_groups
+                    ]
+                )
             elif self.adam_style:
                 input_to_avg_hessian = list(
                     [
@@ -233,6 +248,14 @@ class HesScaleCurvatureBase(DiagCurvatureBase):
 class HesScaleCurvatureMax(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScale, style='max')
+
+class HesScaleCurvatureRaw(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='raw')
+
+class HesScaleCurvatureAbs(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScale, style='abs')
 
 class HesScaleCurvatureAdamStyle(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):

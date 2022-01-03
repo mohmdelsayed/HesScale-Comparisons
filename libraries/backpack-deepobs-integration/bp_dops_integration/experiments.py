@@ -58,6 +58,8 @@ class GridSearchFactory():
     AdaHessian = "AdaHessian"
     
     HesScaleMax = "HesScaleMax"
+    HesScaleRaw = "HesScaleRaw"
+    HesScaleAbs = "HesScaleAbs"
     HesScaleAdamStyle = "HesScaleAdamStyle"
     HesScaleNoHessianUpdate = "HesScaleNoHessianUpdate"
     HesScaleNoGradUpdateMax = "HesScaleNoGradUpdateMax"
@@ -70,6 +72,8 @@ class GridSearchFactory():
         SGD,
         # SGD2,
         HesScaleMax,
+        HesScaleAbs,
+        HesScaleRaw,
         HesScaleAdamStyle,
         HesScaleNoHessianUpdate,
         HesScaleNoGradUpdateMax,
@@ -98,6 +102,8 @@ class GridSearchFactory():
         HesScaleNoGradUpdateMax: NoTuning,
         HesScaleNoGradUpdateNoHessianUpdate: NoTuning,
         OBD: NoTuning,
+        HesScaleAbs: NoTuning,
+        HesScaleRaw: NoTuning,
     }
 
     CONSTANT = "const"
@@ -113,6 +119,8 @@ class GridSearchFactory():
         (DiagGGNMC, CONSTANT): bpoptim.DiagGGNMCDefaultOptimizer,
         
         (HesScaleMax, CONSTANT): bpoptim.HesScaleOptimizerMax,
+        (HesScaleAbs, CONSTANT): bpoptim.HesScaleOptimizerAbs,
+        (HesScaleRaw, CONSTANT): bpoptim.HesScaleOptimizerRaw,
         (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleOptimizerAdamStyle,
 
         (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerZeroHessianUpdate,

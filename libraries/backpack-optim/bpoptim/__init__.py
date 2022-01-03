@@ -11,6 +11,8 @@ from .curvature import (
     DiagGGNExactCurvature,
     DiagGGNMCCurvature,
     HesScaleCurvatureMax,
+    HesScaleCurvatureAbs,
+    HesScaleCurvatureRaw,
     HesScaleCurvatureAdamStyle,
     HesScaleCurvatureZeroHessianUpdate,
     KFACCurvature,
@@ -22,6 +24,16 @@ from .curvature import (
 def HesScaleOptimizerMax(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleCurvatureMax, lr=lr, damping=damping, **kwargs
+    )
+
+def HesScaleOptimizerAbs(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureAbs, lr=lr, damping=damping, **kwargs
+    )
+
+def HesScaleOptimizerRaw(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleCurvatureRaw, lr=lr, damping=damping, **kwargs
     )
 
 def HesScaleOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
