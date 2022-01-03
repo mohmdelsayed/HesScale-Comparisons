@@ -19,7 +19,7 @@ SEEDS = list(range(42, 52))
 #                    "test_losses", "test_accuracies",
 #                    "valid_losses", "valid_accuracies"
 BEST_STRATEGY = [
-    ("final", "valid_accuracies"),
+    ("area", "valid_accuracies"),
     # ("best", "valid_accuracies"),
 ]
 
