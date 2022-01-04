@@ -223,7 +223,7 @@ class BPGridSearchBase():
         result += "\n# arguments from command line\n"
         result += self._python_script_command_before_training()
         result += "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
-        result += "atexit.register(exit_handler, command)\n"
+        result += "signal.signal(signal.SIGTERM, terminate_signal)\n\n"
         result += "try:"
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
@@ -268,9 +268,9 @@ class BPGridSearchBase():
             self.import_optim_from, self._get_optim_name()))
         import_statements.append("from {} import {}".format(
             self.import_runner_from, self._get_runner_name()))
-        import_statements.append("import atexit")
+        import_statements.append("import signal")
         import_statements.append("import logging\nlogger = logging.Logger('catch_all')")
-        import_statements.append("\ndef exit_handler():\n\twith open('failed.txt', 'a') as f:\t\tf.write(command)")
+        import_statements.append("\ndef terminate_signal(signum, frame):\n\tprint('Exit signal: ', signum)\n\twith open('timeout.txt', 'a') as f:\n\t\tf.write(command)\n\texit(0)")
         return import_statements
 
     def _get_optim_name(self):
