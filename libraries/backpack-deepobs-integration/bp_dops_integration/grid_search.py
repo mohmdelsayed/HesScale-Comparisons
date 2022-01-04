@@ -222,7 +222,8 @@ class BPGridSearchBase():
         # possibility to skip running the training
         result += "\n# arguments from command line\n"
         result += self._python_script_command_before_training()
-
+        result += "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
+        result += "atexit.register(exit_handler, command)\n"
         result += "try:"
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
@@ -267,7 +268,9 @@ class BPGridSearchBase():
             self.import_optim_from, self._get_optim_name()))
         import_statements.append("from {} import {}".format(
             self.import_runner_from, self._get_runner_name()))
+        import_statements.append("import atexit")
         import_statements.append("import logging\nlogger = logging.Logger('catch_all')")
+        import_statements.append("\ndef exit_handler():\n\twith open('failed.txt', 'a') as f:\t\tf.write(command)")
         return import_statements
 
     def _get_optim_name(self):
@@ -378,7 +381,6 @@ class BPGridSearch(BPGridSearchBase):
 
     def _python_script_command_after_training(self, c, filename):
         result = "\n" + c + "# Write command to 'filename.txt'\n"
-        result += c+ "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
         result += c +"with open(" + "'" + filename + ".txt', 'a') as f:\n"
         result += c+"\tf.write(command)\n"
         return result
