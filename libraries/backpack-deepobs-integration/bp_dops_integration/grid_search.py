@@ -227,7 +227,8 @@ class BPGridSearchBase():
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
         result += self._python_script_command_after_training('\t', "finished")
-        result += "except:"
+        result += "except Exception as e:\n"
+        result += "\tlogger.error(e, exc_info=True)"
         result += self._python_script_command_after_training('\t', "failed")
 
         return result
@@ -266,7 +267,7 @@ class BPGridSearchBase():
             self.import_optim_from, self._get_optim_name()))
         import_statements.append("from {} import {}".format(
             self.import_runner_from, self._get_runner_name()))
-
+        import_statements.append("import logging\nlogger = logging.Logger('catch_all')")
         return import_statements
 
     def _get_optim_name(self):
