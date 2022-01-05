@@ -223,7 +223,7 @@ class BPGridSearchBase():
         result += "\n# arguments from command line\n"
         result += self._python_script_command_before_training()
         result += "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
-        result += "signal.signal(signal.SIGTERM, terminate_signal)\n\n"
+        result += "signal.signal(signal.SIGUSR1, terminate_signal)\n\n"
         result += "try:"
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
