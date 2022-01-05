@@ -298,7 +298,7 @@ class net_mlp_obd(nn.Sequential):
 
     def __init__(self, num_outputs, use_tanh=True):
         super(net_mlp_obd, self).__init__()
-        activation = nn.Tanh if use_tanh else nn.ReLU
+        activation = nn.Tanh if use_tanh else nn.ELU
         self.add_module("flatten", flatten())
         self.add_module("dense1", nn.Linear(784, 1000))
         self.add_module("act1", activation())
