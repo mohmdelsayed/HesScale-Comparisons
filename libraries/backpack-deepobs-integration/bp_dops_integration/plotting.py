@@ -10,10 +10,40 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
 
-from deepobs.tuner.tuner_utils import generate_tuning_summary
 from deepobs.analyzer.analyze_utils import _preprocess_path, _rescale_ax
 from bp_dops_integration.plotting_utils import create_setting_analyzer_ranking, _get_optimizer_name_and_testproblem_from_path, _determine_available_metric
 
+
+def generate_tuning_summary(optimizer_path, mode = 'final', metric = 'valid_accuracies'):
+    """Generates a list of dictionaries that holds an overview of the current tuning process.
+    Should not be used for Bayesian tuning methods, since the order of evaluation is ignored in this summary. For
+    Bayesian tuning methods use the tuning summary logging of the respective class.
+
+    Args:
+        optimizer_path (str): Path to the optimizer folder.
+        mode (str): The mode on which the performance measure for the summary is based.
+        metric (str): The metric which is printed to the tuning summary as 'target'
+    Returns:
+        tuning_summary (list): A list of dictionaries. Each dictionary corresponds to one hyperparameter evaluation
+        of the tuning process and holds the hyperparameters and their performance.
+        setting_analyzer_ranking (list): A ranked list of SettingAnalyzers that were used to generate the summary
+        """
+    metric = _determine_available_metric(optimizer_path, metric)
+    setting_analyzer_ranking = create_setting_analyzer_ranking(optimizer_path, mode, metric)
+    tuning_summary = []
+    for sett in setting_analyzer_ranking:
+        if mode == 'final':
+            target_mean = sett.aggregate[metric]['mean'][-1]
+            target_std = sett.aggregate[metric]['std'][-1]
+        elif mode == 'best':
+            idx = np.argmax(sett.aggregate[metric]['mean'])
+            target_mean = sett.aggregate[metric]['mean'][idx]
+            target_std = sett.aggregate[metric]['std'][idx]
+        else:
+            raise RuntimeError('Mode not implemented.')
+        line = {'params': {**sett.aggregate['optimizer_hyperparams'], **sett.aggregate['training_params']}, metric + "_mean": target_mean, metric + '_std': target_std}
+        tuning_summary.append(line)
+    return tuning_summary
 
 def _plot_optimizer_performance(
     path,
