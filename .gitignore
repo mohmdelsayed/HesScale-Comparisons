@@ -290,10 +290,7 @@ code/*/results
 
 # grid search and best runs
 **.tar.xz
-code/grid_search_command_scripts/*
-!code/grid_search_command_scripts/filter_jobs.py
-!code/grid_search_command_scripts/interactive_condor_rm.py
-code/best_run_command_scripts/*
+experiments/grid_search_command_scripts/*
 
 # benchmarks
 code/benchmarks/data
