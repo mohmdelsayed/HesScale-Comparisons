@@ -89,7 +89,7 @@ def _plot_optimizer_performance(
                 if which == "mean_and_std":
                     center = setting.aggregate[_metric]["mean"]
                     std = setting.aggregate[_metric]["std"]
-                    low, high = center - std, center + std
+                    low, high = center - 2.0 * std, center + 2.0 * std
                 elif which == "median_and_quartiles":
                     center = setting.aggregate[_metric]["median"]
                     low = setting.aggregate[_metric]["lower_quartile"]
@@ -166,6 +166,7 @@ def plot_optimizer_performance(
 
 def _plot_hyperparameter_sensitivity(
     optimizer_path,
+    color,
     ax,
     mode="final",
     metric="valid_accuracies",
@@ -181,36 +182,46 @@ def _plot_hyperparameter_sensitivity(
     # create array for plotting
     param_values = [d["params"] for d in tuning_summary]
     target_means = [d[metric + "_mean"] for d in tuning_summary]
+    target_stds = [d[metric + "_std"] for d in tuning_summary]
     
-    plot_list = {}
-    for params, means in zip(param_values, target_means):
+    plot_list_means = {}
+    plot_list_stds = {}
+    for params, means, stds in zip(param_values, target_means, target_stds):
         try:
-            plot_list[(params["beta1"], params["beta2"])].append({params["lr"]: means})
+            plot_list_means[(params["beta1"], params["beta2"])].append({params["lr"]: means})
+            plot_list_stds[(params["beta1"], params["beta2"])].append({params["lr"]: stds})
         except:
-            plot_list[(params["beta1"], params["beta2"])] = [{params["lr"]: means}]
+            plot_list_means[(params["beta1"], params["beta2"])] = [{params["lr"]: means}]
+            plot_list_stds[(params["beta1"], params["beta2"])] = [{params["lr"]: stds}]
         
-    for i, setting in enumerate(plot_list):
-        internal_dict = plot_list[setting]
-        x, y = [], []
-        for element in internal_dict:
-            for k,v in element.items():
-                x.append(k); y.append(v)
+    for i, (setting_means, setting_stds) in enumerate(zip(plot_list_means, plot_list_stds)):
+        internal_dict_means = plot_list_means[setting_means]
+        internal_dict_stds = plot_list_stds[setting_stds]
+        x_mean, y_mean = [], []
+        x_std, y_std = [], []
+        for element_mean, element_std in zip(internal_dict_means, internal_dict_stds):
+            for k, v in element_mean.items():
+                x_mean.append(k); y_mean.append(v)
+            for k, v in element_std.items():
+                x_std.append(k); y_std.append(v)
 
-        x = np.asarray(x); y = np.asarray(y); sorted_indx = np.argsort(x)
+        x_mean = np.asarray(x_mean); y_mean = np.asarray(y_mean); sorted_indx_mean = np.argsort(x_mean)
+        x_std = np.asarray(x_std); y_std = np.asarray(y_std); sorted_indx_std = np.argsort(x_std)
         
         idx1 = i // 3; idx2 = i % 3
         
         if "SGD" in optimizer_name:
             idx1 = idx2 = 2
 
-        ax[idx1][idx2].plot(x[sorted_indx], y[sorted_indx], linewidth=1, label=optimizer_name)
-        ax[idx1][idx2].set_ylabel(str(setting), fontsize=14)
+        ax[idx1][idx2].plot(x_mean[sorted_indx_mean], y_mean[sorted_indx_mean], linewidth=1, label=optimizer_name, color=color)        
+        ax[idx1][idx2].fill_between(x_std[sorted_indx_std], y_mean[sorted_indx_std] - y_std[sorted_indx_std], y_mean[sorted_indx_std] + y_std[sorted_indx_std], alpha=0.2, facecolor=color)
+        ax[idx1][idx2].set_ylabel(str(setting_means), fontsize=14)
         ax[idx1][idx2].tick_params(labelsize=12)
         ax[idx1][idx2].set_xscale('log')
-        if "SGD" in optimizer_name:
-            ax[2][2].legend(prop={'size': 8})
+    if "SGD" in optimizer_name:
+        ax[2][2].legend(prop={'size': 8})
             
-        ax[0][0].legend(prop={'size': 8})
+    ax[0][0].legend(prop={'size': 8})
 
     ax[0][0].set_title(testproblem, fontsize=20)
     return ax
@@ -218,6 +229,7 @@ def _plot_hyperparameter_sensitivity(
 
 def plot_hyperparameter_sensitivity(
     path,
+    color,
     mode="final",
     metric="valid_accuracies",
     reference_path=None,
@@ -247,7 +259,7 @@ def plot_hyperparameter_sensitivity(
     for optimizer_path in pathes:
         metric = _determine_available_metric(optimizer_path, metric)
         ax = _plot_hyperparameter_sensitivity(
-            optimizer_path, ax, mode, metric
+            optimizer_path, color, ax, mode, metric
         )
     if reference_path is not None:
         pathes = _preprocess_path(reference_path)
