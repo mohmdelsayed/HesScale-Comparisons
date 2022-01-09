@@ -213,7 +213,7 @@ def _plot_hyperparameter_sensitivity(
         if "SGD" in optimizer_name:
             idx1 = idx2 = 2
 
-        ax[idx1][idx2].plot(x_mean[sorted_indx_mean], y_mean[sorted_indx_mean], linewidth=1, label=optimizer_name, color=color)        
+        ax[idx1][idx2].plot(x_mean[sorted_indx_mean], y_mean[sorted_indx_mean], linewidth=1, label=optimizer_name, color=color, marker=".")        
         ax[idx1][idx2].fill_between(x_std[sorted_indx_std], y_mean[sorted_indx_std] - y_std[sorted_indx_std], y_mean[sorted_indx_std] + y_std[sorted_indx_std], alpha=0.2, facecolor=color)
         ax[idx1][idx2].set_ylabel(str(setting_means), fontsize=14)
         ax[idx1][idx2].tick_params(labelsize=12)
