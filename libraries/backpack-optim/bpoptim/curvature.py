@@ -64,7 +64,7 @@ class SgdCurvature:
     def compute_inverse(self, damping=0.0):
         grad = list(
             [
-                list([p.grad for p in group["params"]])
+                list([p.grad.data + group['weight_decay'] * p.data for p in group["params"]])
                 for group in self.param_groups
             ]
         )
@@ -94,7 +94,7 @@ class AdamCurvature(CurvatureEstimator):
         )
         input_to_avg_grad = list(
             [
-                list([p.grad.data for p in group["params"]])
+                list([p.grad.data + group['weight_decay'] * p.data for p in group["params"]])
                 for group in self.param_groups
             ]
         )
@@ -140,7 +140,7 @@ class BackpackCurvatureEstimator(CurvatureEstimator):
             )
             input_to_avg_grad = list(
                 [
-                    list([p.grad for p in group["params"]])
+                    list([p.grad.data + group['weight_decay'] * p.data for p in group["params"]])
                     for group in self.param_groups
                 ]
             )
@@ -193,7 +193,7 @@ class HesScaleCurvatureBase(DiagCurvatureBase):
 
             input_to_avg_grad = list(
                 [
-                    list([p.grad for p in group["params"]])
+                    list([p.grad.data + group['weight_decay'] * p.data for p in group["params"]])
                     for group in self.param_groups
                 ]
             )

@@ -143,7 +143,7 @@ class AdaHessianOptimizer(Optimizer):
             state['step'] += 1
 
             # Decay the first and second moment running average coefficient
-            exp_avg.mul_(beta1).add_(grad.detach_(), alpha=1 - beta1)
+            exp_avg.mul_(beta1).add_(grad.detach_() + group['weight_decay'] * p.data, alpha=1 - beta1)
             exp_hessian_diag_sq.mul_(beta2).addcmul_(hut_trace, hut_trace, value=1 - beta2)
 
             bias_correction1 = 1 - beta1 ** state['step']

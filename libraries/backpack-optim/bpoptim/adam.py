@@ -56,7 +56,7 @@ class AdamOptimizer(Optimizer):
                 state["step"] += 1
 
                 # Decay the first and second moment running average coefficient
-                exp_avg.mul_(beta1).add_(p.grad.data, alpha=1 - beta1)
+                exp_avg.mul_(beta1).add_(p.grad.data + group['weight_decay'] * p.data, alpha=1 - beta1)
                 exp_avg_sq.mul_(beta2).add_(
                     p.grad.data ** 2, alpha=1 - beta2
                 )
