@@ -8,6 +8,7 @@ source .hesscale_comp/bin/activate
 # install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt 
-pip install -e backpack-optim/
-pip install -e backpack-deepobs-integration/
+pip install -e libraries/backpack-optim/
+pip install -e libraries/backpack-deepobs-integration/
+pip install -e HesScale/
 ```
