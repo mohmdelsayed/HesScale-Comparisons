@@ -19,6 +19,6 @@ echo -e "#SBATCH --error=%x%A%a.err\t\t\t# standard error\n" >> ${f%.*}.sh
 echo "FILE=\"\$SCRATCH/HesScale-Comparisons/experiments/grid_search_command_scripts/${f%.*}.txt\""  >> ${f%.*}.sh
 echo "SCRIPT=\$(sed -n \"\${SLURM_ARRAY_TASK_ID}p\" \$FILE)"  >> ${f%.*}.sh
 echo "module load python/3.7.9" >> ${f%.*}.sh
-echo "source \$SCRATCH/HesScale-Comparisons/env/bin/activate" >> ${f%.*}.sh
+echo "source \$SCRATCH/HesScale-Comparisons/.hesscale_comp/bin/activate" >> ${f%.*}.sh
 echo "srun \$SCRIPT" >> ${f%.*}.sh
 done
