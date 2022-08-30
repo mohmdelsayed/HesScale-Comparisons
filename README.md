@@ -19,7 +19,7 @@ pip install -e HesScale/
 source .hesscale_comp/bin/activate
 # generate the grid search values for each method
 cd experiments/exp/
-python exp01_grid_search.py --dobs_problem mnist_logreg_custom
+python exp01_grid_search.py --problem mnist_logreg_custom
 # create scripts for each method to run on SLURM
 cd ../grid_search_command_scripts/
 ./create_scripts.bash 
