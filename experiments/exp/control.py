@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description="Choose the DeepOBS problem")
 
 parser.add_argument("--problem",
                     type=str,
-                    default="mnist_mlp_tanh",
+                    default="all",
                     choices=CHOICES,
                     help=f"DeepOBS problem")
 
