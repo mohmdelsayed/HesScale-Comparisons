@@ -222,9 +222,10 @@ class BPGridSearchBase():
         # possibility to skip running the training
         result += "\n# arguments from command line\n"
         result += self._python_script_command_before_training()
-        result += "command = 'python3 {}\\n'.format(' '.join(sys.argv))\n"
+        result += "command = 'python3 {}\'.format(' '.join(sys.argv))\n"
         result += "signal.signal(signal.SIGUSR1, terminate_signal)\n\n"
         result += "try:"
+        result += "\n\tstart_time = time.time()"
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
         result += self._python_script_command_after_training('\t', "finished")
@@ -269,6 +270,7 @@ class BPGridSearchBase():
         import_statements.append("from {} import {}".format(
             self.import_runner_from, self._get_runner_name()))
         import_statements.append("import signal")
+        import_statements.append("import time")
         import_statements.append("import logging\nlogger = logging.Logger('catch_all')")
         import_statements.append("\ndef terminate_signal(signum, frame):\n\tprint('Exit signal: ', signum)\n\twith open('timeout.txt', 'a') as f:\n\t\tf.write(command)\n\texit(0)")
         return import_statements
@@ -382,7 +384,7 @@ class BPGridSearch(BPGridSearchBase):
     def _python_script_command_after_training(self, c, filename):
         result = "\n" + c + "# Write command to 'filename.txt'\n"
         result += c +"with open(" + "'" + filename + ".txt', 'a') as f:\n"
-        result += c+"\tf.write(command)\n"
+        result += c+"\tf.write(command+' '+str(time.time() - start_time)+'\\n')\n"
         return result
 
     def _get_import_statement(self):
