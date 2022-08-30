@@ -228,11 +228,11 @@ class BPGridSearchBase():
         result += "\n\tstart_time = time.time()"
         result += "\n\trunner.run()"
         # possibility to log successful run somewhere
-        result += self._python_script_command_after_training('\t', "finished")
+        result += self._python_script_command_after_training_finished('\t', f"finished_{self._get_optim_name()}")
         result += "except Exception as e:\n"
         result += "\tlogger.error(e, exc_info=True)"
-        result += self._python_script_command_after_training('\t', "failed")
-
+        result += self._python_script_command_after_training_failed('\t', f"failed_{self._get_optim_name()}")
+        
         return result
 
     def _python_script_command_before_training(self):
@@ -243,7 +243,14 @@ class BPGridSearchBase():
         """
         return ""
 
-    def _python_script_command_after_training(self, c, filename):
+    def _python_script_command_after_training_finished(self, c, filename):
+        """Command that is run after training loop.
+
+        Can be used to log somewhere that the run was successful.
+        """
+        return ""
+
+    def _python_script_command_after_training_failed(self, c, filename):
         """Command that is run after training loop.
 
         Can be used to log somewhere that the run was successful.
@@ -381,10 +388,16 @@ class BPGridSearch(BPGridSearchBase):
             dim *= len(values)
         return dim
 
-    def _python_script_command_after_training(self, c, filename):
+    def _python_script_command_after_training_finished(self, c, filename):
         result = "\n" + c + "# Write command to 'filename.txt'\n"
         result += c +"with open(" + "'" + filename + ".txt', 'a') as f:\n"
         result += c+"\tf.write(command+' '+str(time.time() - start_time)+'\\n')\n"
+        return result
+
+    def _python_script_command_after_training_failed(self, c, filename):
+        result = "\n" + c + "# Write command to 'filename.txt'\n"
+        result += c +"with open(" + "'" + filename + ".txt', 'a') as f:\n"
+        result += c+"\tf.write(command+'\\n')\n"
         return result
 
     def _get_import_statement(self):
