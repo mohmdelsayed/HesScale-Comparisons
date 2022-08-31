@@ -165,6 +165,68 @@ class net_mnist_2c2d(nn.Sequential):
                 )
 
 
+class net_mnist_2c2d_obd(nn.Sequential):
+    """  Basic conv net for (Fashion-)MNIST. The network has been adapted from the `TensorFlow tutorial\
+  <https://www.tensorflow.org/tutorials/estimators/cnn>`_ and consists of
+
+    - two conv layers with ELUs, each followed by max-pooling
+    - one fully-connected layers with ELUs
+    - output layer with softmax
+
+  The weight matrices are initialized with truncated normal (standard deviation
+  of ``0.05``) and the biases are initialized to ``0.05``."""
+
+    def __init__(self, num_outputs, use_tanh=True):
+        """Args:
+        num_outputs (int): The numer of outputs (i.e. target classes)."""
+
+        super(net_mnist_2c2d_obd, self).__init__()
+        activation = nn.Tanh if use_tanh else nn.ELU
+
+        self.add_module(
+            "conv1",
+            tfconv2d(
+                in_channels=1, out_channels=32, kernel_size=5, tf_padding_type = None
+            ),
+        )
+        self.add_module("act1", activation())
+        self.add_module(
+            "max_pool1", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type = None)
+        )
+
+        self.add_module(
+            "conv2",
+            tfconv2d(
+                in_channels=32, out_channels=64, kernel_size=5, tf_padding_type = None
+            ),
+        )
+        self.add_module("act2", activation())
+        self.add_module(
+            "max_pool2", tfmaxpool2d(kernel_size=2, stride=2, tf_padding_type = None)
+        )
+
+        self.add_module("flatten", flatten())
+
+        self.add_module("dense1", nn.Linear(in_features=4 * 4 * 64, out_features=1024))
+        self.add_module("act3", activation())
+
+        self.add_module("dense2", nn.Linear(in_features=1024, out_features=num_outputs))
+        self.add_module("logsoftmax", nn.LogSoftmax())
+
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.constant_(module.bias, 0.05)
+                module.weight.data = _truncated_normal_init(
+                    module.weight.data, mean=0, stddev=0.05
+                )
+
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.05)
+                module.weight.data = _truncated_normal_init(
+                    module.weight.data, mean=0, stddev=0.05
+                )
+
 class net_cifar100_allcnnc(nn.Sequential):
     def __init__(self, use_tanh=True):
         super(net_cifar100_allcnnc, self).__init__()

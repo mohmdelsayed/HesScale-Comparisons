@@ -3,7 +3,7 @@
 
 import warnings
 from torch import nn
-from testproblems_modules import net_mnist_2c2d
+from testproblems_modules import net_mnist_2c2d_obd
 from mnist import mnist
 from deepobs.pytorch.testproblems.testproblem import UnregularizedTestproblem
 
@@ -55,6 +55,6 @@ class mnist_2c2d_relu_obd(UnregularizedTestproblem):
         """Sets up the vanilla CNN test problem on MNIST."""
         self.data = mnist(self._batch_size)
         self.loss_function = nn.NLLLoss
-        self.net = net_mnist_2c2d(num_outputs=10, use_tanh=False)
+        self.net = net_mnist_2c2d_obd(num_outputs=10, use_tanh=False)
         self.net.to(self._device)
         self.regularization_groups = self.get_regularization_groups()
