@@ -16,7 +16,7 @@ from backpack import backpack
 from backpack.extensions import DiagGGNExact, DiagGGNMC, KFAC, KFLR, KFRA
 
 from bpoptim.utils import multiply_vec_with_kron_facs
-from hesscale import HesScale
+from hesscale import HesScale, HesScaleLM
 
 from .utils import NUMERICAL_STABILITY_CONSTANT
 from .inverse_curvature import (
@@ -260,6 +260,10 @@ class HesScaleCurvatureAbs(HesScaleCurvatureBase):
 class HesScaleCurvatureAdamStyle(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScale, style='adam')
+        
+class HesScaleLMCurvatureAdamStyle(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScaleLM, style='adam')
         
 class HesScaleCurvatureZeroHessianUpdate(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
