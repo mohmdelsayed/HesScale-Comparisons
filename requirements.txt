@@ -35,3 +35,6 @@ typed-ast==1.5.0
 typing_extensions==4.0.0
 zipp==3.6.0
 -e git+https://github.com/fsschneider/DeepOBS.git@0be822c3f88f0cf499d019b13ce9e27227fdd8b9#egg=deepobs
+-e libraries/backpack-optim/
+-e libraries/backpack-deepobs-integration/
+-e HesScale/
