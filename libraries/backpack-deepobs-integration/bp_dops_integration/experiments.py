@@ -7,23 +7,24 @@ from .tuning import (TuningBaseDamping, TuningConstantDampingNoCurvature,
                      NoTuning)
 
 PROBLEMS = [
-    'cifar10_3c3d_tanh',
-    'cifar10_3c3d_relu',
-    'cifar100_3c3d_tanh',
-    'cifar100_3c3d_relu',
-    'cifar100_allcnnc_tanh',
-    'cifar100_allcnnc_relu',
-    'fmnist_2c2d_tanh',
-    'fmnist_2c2d_relu',
-    'fmnist_mlp_tanh',
-    'fmnist_mlp_relu',
-    'mnist_2c2d_tanh',
-    'mnist_2c2d_relu',
+    # 'cifar10_3c3d_tanh',
+    # 'cifar10_3c3d_relu',
+    # 'cifar100_3c3d_tanh',
+    # 'cifar100_3c3d_relu',
+    # 'cifar100_allcnnc_tanh',
+    # 'cifar100_allcnnc_relu',
+    # 'fmnist_2c2d_tanh',
+    # 'fmnist_2c2d_relu',
+    # 'fmnist_mlp_tanh',
+    # 'fmnist_mlp_relu',
+    # 'mnist_2c2d_tanh',
+    # 'mnist_2c2d_relu',
     'mnist_mlp_tanh',
-    'mnist_mlp_relu',
+    # 'mnist_mlp_relu',
     'mnist_mlp_tanh_obd',
-    'mnist_logreg_custom',
-    'mnist_logreg_custom_obd',
+    # 'mnist_logreg_custom',
+    # 'mnist_logreg_custom_obd',
+    # 'mnist_2c2d_relu_obd',
 ]
 
 DEFAULT_TEST_PROBLEMS_SETTINGS = {
@@ -35,6 +36,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "cifar100_allcnnc_relu": {"batch_size": 256, "num_epochs": 350},
     "mnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
     "mnist_2c2d_relu": {"batch_size": 128, "num_epochs": 100},
+    "mnist_2c2d_relu_obd": {"batch_size": 128, "num_epochs": 100},
     "mnist_mlp_tanh": {"batch_size": 128, "num_epochs": 100},
     "mnist_mlp_tanh_obd": {"batch_size": 128, "num_epochs": 100},
     "mnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
@@ -56,7 +58,7 @@ class GridSearchFactory():
     SGD = "SGD"
     SGD2 = "SGD2"
     AdaHessian = "AdaHessian"
-    
+    HesScaleLMAdamStyle = "HesScaleLMAdamStyle"
     HesScaleMax = "HesScaleMax"
     HesScaleRaw = "HesScaleRaw"
     HesScaleAbs = "HesScaleAbs"
@@ -65,25 +67,26 @@ class GridSearchFactory():
     HesScaleNoGradUpdateMax = "HesScaleNoGradUpdateMax"
     HesScaleNoGradUpdateNoHessianUpdate = "HesScaleNoGradUpdateNoHessianUpdate"
     OBD = "OBD"
+    OBDAbsStyle = "OBDAbs"
 
     CURVATURES = [
         Adam,
-        # Adam2,
         SGD,
-        # SGD2,
-        HesScaleMax,
         HesScaleAbs,
-        HesScaleRaw,
         HesScaleAdamStyle,
-        HesScaleNoHessianUpdate,
-        HesScaleNoGradUpdateMax,
-        HesScaleNoGradUpdateNoHessianUpdate,
-        # OBD,
-        
+        HesScaleLMAdamStyle,
+        OBD,
+        OBDAbsStyle,
         DiagGGNMC,
-        DiagGGNExact,
-        # KFAC,
         AdaHessian,
+
+        # HesScaleMax,
+        # DiagGGNExact,
+        # HesScaleRaw,
+        # KFAC,
+        # HesScaleNoHessianUpdate,
+        # HesScaleNoGradUpdateMax,
+        # HesScaleNoGradUpdateNoHessianUpdate,
     ]
 
     CURVATURES_TUNING = {
@@ -102,8 +105,10 @@ class GridSearchFactory():
         HesScaleNoGradUpdateMax: NoTuning,
         HesScaleNoGradUpdateNoHessianUpdate: NoTuning,
         OBD: NoTuning,
+        OBDAbsStyle: NoTuning,
         HesScaleAbs: NoTuning,
         HesScaleRaw: NoTuning,
+        HesScaleLMAdamStyle: NoTuning,
     }
 
     CONSTANT = "const"
@@ -122,6 +127,7 @@ class GridSearchFactory():
         (HesScaleAbs, CONSTANT): bpoptim.HesScaleOptimizerAbs,
         (HesScaleRaw, CONSTANT): bpoptim.HesScaleOptimizerRaw,
         (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleOptimizerAdamStyle,
+        (HesScaleLMAdamStyle, CONSTANT): bpoptim.HesScaleLMOptimizerAdamStyle,
 
         (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerZeroHessianUpdate,
         (HesScaleNoGradUpdateMax, CONSTANT): bpoptim.HesScaleOptimizerNoGradUpdateMax,
@@ -136,6 +142,7 @@ class GridSearchFactory():
         (KFAC, CONSTANT): bpoptim.KFACDefaultOptimizer,
         (AdaHessian, CONSTANT): bpoptim.AdaHessDefaultOptimizer,
         (OBD, CONSTANT): bpoptim.OBDAdamStyle,
+        (OBDAbsStyle, CONSTANT): bpoptim.OBDAbsStyle,
     }
 
     def make_grid_search(self,
