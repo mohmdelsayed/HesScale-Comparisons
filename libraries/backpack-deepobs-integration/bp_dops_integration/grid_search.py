@@ -279,7 +279,7 @@ class BPGridSearchBase():
         import_statements.append("import signal")
         import_statements.append("import time")
         import_statements.append("import logging\nlogger = logging.Logger('catch_all')")
-        import_statements.append("\ndef terminate_signal(signum, frame):\n\tprint('Exit signal: ', signum)\n\twith open('timeout.txt', 'a') as f:\n\t\tf.write(command)\n\texit(0)")
+        import_statements.append("\ndef terminate_signal(signum, frame):\n\tprint('Exit signal: ', signum)\n\twith open('timeout.txt', 'a') as f:\n\t\tf.write(command+'\\n')\n\texit(0)")
         return import_statements
 
     def _get_optim_name(self):
