@@ -264,7 +264,11 @@ class HesScaleCurvatureAdamStyle(HesScaleCurvatureBase):
 class HesScaleLMCurvatureAdamStyle(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScaleLM, style='adam')
-        
+
+class HesScaleLMCurvatureAbs(HesScaleCurvatureBase):
+    def __init__(self, param_groups, beta1, beta2):
+        super().__init__(param_groups, beta1, beta2, HesScaleLM, style='abs')
+
 class HesScaleCurvatureZeroHessianUpdate(HesScaleCurvatureBase):
     def __init__(self, param_groups, beta1, beta2):
         super().__init__(param_groups, beta1, beta2, HesScale, style='no_h_update')

@@ -16,6 +16,7 @@ from .curvature import (
     HesScaleCurvatureAdamStyle,
     HesScaleCurvatureZeroHessianUpdate,
     HesScaleLMCurvatureAdamStyle,
+    HesScaleLMCurvatureAbs,
     KFACCurvature,
     AdamCurvature,
     SgdCurvature,
@@ -45,6 +46,11 @@ def HesScaleOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
 def HesScaleLMOptimizerAdamStyle(params, lr=1, damping=0.1, **kwargs):
     return HesScaleOptimizer(
         params, HesScaleLMCurvatureAdamStyle, lr=lr, damping=damping, **kwargs
+    )
+
+def HesScaleLMOptimizerAbs(params, lr=1, damping=0.1, **kwargs):
+    return HesScaleOptimizer(
+        params, HesScaleLMCurvatureAbs, lr=lr, damping=damping, **kwargs
     )
 
 def OBDAdamStyle(params, lr=1, damping=0.1, **kwargs):
