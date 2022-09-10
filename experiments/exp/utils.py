@@ -141,7 +141,7 @@ def _exclude(damping, problem, curvature):
         return curvature == GridSearchFactory.KFLR
 
     def is_obd(curvature):
-        return curvature == GridSearchFactory.OBD or curvature == GridSearchFactory.OBDAbsStyle
+        return curvature == GridSearchFactory.OBDAdamStyle or curvature == GridSearchFactory.OBDAbsStyle
 
     def is_fmnist_2c2d(problem):
         return problem == "fmnist_2c2d"
