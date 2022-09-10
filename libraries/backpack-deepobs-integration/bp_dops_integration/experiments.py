@@ -66,8 +66,9 @@ class GridSearchFactory():
     HesScaleNoHessianUpdate = "HesScaleNoHessianUpdate"
     HesScaleNoGradUpdateMax = "HesScaleNoGradUpdateMax"
     HesScaleNoGradUpdateNoHessianUpdate = "HesScaleNoGradUpdateNoHessianUpdate"
-    OBD = "OBD"
+    OBDAdamStyle = "OBDAdamStyle"
     OBDAbsStyle = "OBDAbs"
+    HesScaleLMOptimizerAbs = "HesScaleLMOptimizerAbs"
 
     CURVATURES = [
         Adam,
@@ -75,11 +76,12 @@ class GridSearchFactory():
         HesScaleAbs,
         HesScaleAdamStyle,
         HesScaleLMAdamStyle,
-        OBD,
+        HesScaleLMOptimizerAbs,
         OBDAbsStyle,
         DiagGGNMC,
         AdaHessian,
-
+        
+        OBDAdamStyle,
         # HesScaleMax,
         # DiagGGNExact,
         # HesScaleRaw,
@@ -104,11 +106,12 @@ class GridSearchFactory():
         HesScaleNoHessianUpdate: NoTuning,
         HesScaleNoGradUpdateMax: NoTuning,
         HesScaleNoGradUpdateNoHessianUpdate: NoTuning,
-        OBD: NoTuning,
+        OBDAdamStyle: NoTuning,
         OBDAbsStyle: NoTuning,
         HesScaleAbs: NoTuning,
         HesScaleRaw: NoTuning,
         HesScaleLMAdamStyle: NoTuning,
+        HesScaleLMOptimizerAbs: NoTuning,
     }
 
     CONSTANT = "const"
@@ -128,7 +131,7 @@ class GridSearchFactory():
         (HesScaleRaw, CONSTANT): bpoptim.HesScaleOptimizerRaw,
         (HesScaleAdamStyle, CONSTANT): bpoptim.HesScaleOptimizerAdamStyle,
         (HesScaleLMAdamStyle, CONSTANT): bpoptim.HesScaleLMOptimizerAdamStyle,
-
+        (HesScaleLMOptimizerAbs, CONSTANT): bpoptim.HesScaleLMOptimizerAbs,
         (HesScaleNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerZeroHessianUpdate,
         (HesScaleNoGradUpdateMax, CONSTANT): bpoptim.HesScaleOptimizerNoGradUpdateMax,
         (HesScaleNoGradUpdateNoHessianUpdate, CONSTANT): bpoptim.HesScaleOptimizerNoGradUpdateZeroHessianUpdate,
@@ -141,7 +144,7 @@ class GridSearchFactory():
 
         (KFAC, CONSTANT): bpoptim.KFACDefaultOptimizer,
         (AdaHessian, CONSTANT): bpoptim.AdaHessDefaultOptimizer,
-        (OBD, CONSTANT): bpoptim.OBDAdamStyle,
+        (OBDAdamStyle, CONSTANT): bpoptim.OBDAdamStyle,
         (OBDAbsStyle, CONSTANT): bpoptim.OBDAbsStyle,
     }
 
