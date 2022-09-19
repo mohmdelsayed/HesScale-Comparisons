@@ -102,6 +102,66 @@ class net_cifar10_3c3d(nn.Sequential):
                 nn.init.constant_(module.bias, 0.0)
                 nn.init.xavier_uniform_(module.weight)
 
+class net_cifar10_3c3d_obd(nn.Sequential):
+    """Basic conv net for cifar10/100. The network consists of
+      - thre conv layers with ELUs, each followed by max-pooling
+      - two fully-connected layers with ``512`` and ``256`` units and ELU activation
+      - output layer with softmax
+    The weight matrices are initialized using Xavier initialization and the biases
+    are initialized to ``0.0``."""
+
+    def __init__(self, num_outputs, use_tanh=True):
+        """Args:
+        num_outputs (int): The numer of outputs (i.e. target classes)."""
+        super(net_cifar10_3c3d_obd, self).__init__()
+        activation = nn.Tanh if use_tanh else nn.ELU
+
+        self.add_module(
+            "conv1", tfconv2d(in_channels=3, out_channels=64, kernel_size=5)
+        )
+        self.add_module("act1", activation())
+        self.add_module(
+            "maxpool1", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type = None)
+        )
+
+        self.add_module(
+            "conv2", tfconv2d(in_channels=64, out_channels=96, kernel_size=3)
+        )
+        self.add_module("act2", activation())
+        self.add_module(
+            "maxpool2", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type = None)
+        )
+
+        self.add_module(
+            "conv3",
+            tfconv2d(
+                in_channels=96, out_channels=128, kernel_size=3, tf_padding_type = None
+            ),
+        )
+        self.add_module("act3", activation())
+        self.add_module(
+            "maxpool3", tfmaxpool2d(kernel_size=3, stride=2, tf_padding_type = None)
+        )
+
+        self.add_module("flatten", flatten())
+
+        self.add_module("dense1", nn.Linear(in_features=1 * 1 * 128, out_features=512))
+        self.add_module("act4", activation())
+        self.add_module("dense2", nn.Linear(in_features=512, out_features=256))
+        self.add_module("act5", activation())
+        self.add_module("dense3", nn.Linear(in_features=256, out_features=num_outputs))
+        self.add_module("logsoftmax", nn.LogSoftmax())
+
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_normal_(module.weight)
+
+            if isinstance(module, nn.Linear):
+                nn.init.constant_(module.bias, 0.0)
+                nn.init.xavier_uniform_(module.weight)
+
 
 class net_mnist_2c2d(nn.Sequential):
     """  Basic conv net for (Fashion-)MNIST. The network has been adapted from the `TensorFlow tutorial\
