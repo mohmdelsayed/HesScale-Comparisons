@@ -12,6 +12,7 @@ PROBLEMS = [
     # 'cifar100_3c3d_tanh',
     # 'cifar100_3c3d_relu',
     # 'cifar100_allcnnc_tanh',
+    'imagenet_allcnnc_relu',
     # 'cifar100_allcnnc_relu',
     # 'fmnist_2c2d_tanh',
     # 'fmnist_2c2d_relu',
@@ -19,9 +20,9 @@ PROBLEMS = [
     # 'fmnist_mlp_relu',
     # 'mnist_2c2d_tanh',
     # 'mnist_2c2d_relu',
-    'mnist_mlp_tanh',
+    # 'mnist_mlp_tanh',
     # 'mnist_mlp_relu',
-    'mnist_mlp_tanh_obd',
+    # 'mnist_mlp_tanh_obd',
     # 'mnist_logreg_custom',
     # 'mnist_logreg_custom_obd',
     # 'mnist_2c2d_relu_obd',
@@ -47,6 +48,7 @@ DEFAULT_TEST_PROBLEMS_SETTINGS = {
     "fmnist_mlp_relu": {"batch_size": 128, "num_epochs": 100},
     "fmnist_2c2d_tanh": {"batch_size": 128, "num_epochs": 100},
     "fmnist_2c2d_relu": {"batch_size": 128, "num_epochs": 100},
+    "imagenet_allcnnc_relu": {"batch_size": 256, "num_epochs": 50},
 }
 
 class GridSearchFactory():
@@ -73,15 +75,15 @@ class GridSearchFactory():
     CURVATURES = [
         Adam,
         SGD,
-        HesScaleAbs,
-        HesScaleAdamStyle,
+        # HesScaleAbs,
+        # HesScaleAdamStyle,
         HesScaleLMAdamStyle,
-        HesScaleLMOptimizerAbs,
-        OBDAbsStyle,
+        # HesScaleLMOptimizerAbs,
+        # OBDAbsStyle,
         DiagGGNMC,
         AdaHessian,
         
-        OBDAdamStyle,
+        # OBDAdamStyle,
         # HesScaleMax,
         # DiagGGNExact,
         # HesScaleRaw,

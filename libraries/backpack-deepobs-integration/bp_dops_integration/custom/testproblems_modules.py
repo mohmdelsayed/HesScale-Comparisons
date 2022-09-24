@@ -379,6 +379,98 @@ class net_cifar100_allcnnc(nn.Sequential):
                 nn.init.xavier_normal_(module.weight)
 
 
+class net_imagenet_allcnnc(nn.Sequential):
+    def __init__(self, use_tanh=True):
+        super(net_imagenet_allcnnc, self).__init__()
+
+        activation = nn.Tanh if use_tanh else nn.ReLU
+
+        self.add_module("dropout1", nn.Dropout(p=0.2))
+
+        self.add_module(
+            "conv1",
+            tfconv2d(
+                in_channels=3, out_channels=96, kernel_size=3, tf_padding_type = None
+            ),
+        )
+        self.add_module("act1", activation())
+        self.add_module(
+            "conv2",
+            tfconv2d(
+                in_channels=96, out_channels=96, kernel_size=3, tf_padding_type = None
+            ),
+        )
+        self.add_module("act2", activation())
+        self.add_module(
+            "conv3",
+            tfconv2d(
+                in_channels=96,
+                out_channels=96,
+                kernel_size=3,
+                stride=(2, 2),
+                tf_padding_type = None,
+            ),
+        )
+        self.add_module("act3", activation())
+
+        self.add_module("dropout2", nn.Dropout(p=0.5))
+
+        self.add_module(
+            "conv4",
+            tfconv2d(
+                in_channels=96, out_channels=192, kernel_size=3, tf_padding_type = None
+            ),
+        )
+        self.add_module("act4", activation())
+        self.add_module(
+            "conv5",
+            tfconv2d(
+                in_channels=192, out_channels=192, kernel_size=3, tf_padding_type = None
+            ),
+        )
+        self.add_module("act5", activation())
+        self.add_module(
+            "conv6",
+            tfconv2d(
+                in_channels=192,
+                out_channels=192,
+                kernel_size=3,
+                stride=(2, 2),
+                tf_padding_type = None,
+            ),
+        )
+        self.add_module("act6", activation())
+
+        self.add_module("dropout3", nn.Dropout(p=0.5))
+
+        self.add_module(
+            "conv7", tfconv2d(in_channels=192, out_channels=192, kernel_size=3)
+        )
+        self.add_module("act7", activation())
+        self.add_module(
+            "conv8",
+            tfconv2d(
+                in_channels=192, out_channels=192, kernel_size=1, tf_padding_type = None
+            ),
+        )
+        self.add_module("act8", activation())
+        self.add_module(
+            "conv9",
+            tfconv2d(
+                in_channels=192, out_channels=1000, kernel_size=1, tf_padding_type = None
+            ),
+        )
+        self.add_module("act9", activation())
+
+        self.add_module("mean", mean_allcnnc())
+
+        # init the layers
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.constant_(module.bias, 0.1)
+                nn.init.xavier_normal_(module.weight)
+
+
 class net_mlp(nn.Sequential):
     """A basic MLP architecture. The network is build as follows:
 
